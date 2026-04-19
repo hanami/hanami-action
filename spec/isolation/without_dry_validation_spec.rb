@@ -3,8 +3,8 @@
 require_relative "../support/isolation_spec_helper"
 
 RSpec.describe "Without validations" do
-  it "doesn't load Hanami::Validations" do
-    expect(defined?(Hanami::Validations)).to be(nil)
+  it "doesn't load Dry::Validation" do
+    expect(defined?(Dry::Validation)).to be(nil)
   end
 
   it "doesn't load Hanami::Action::Validatable" do
@@ -20,7 +20,7 @@ RSpec.describe "Without validations" do
       end
     end.to raise_error(
       NoMethodError,
-      %(To use `.params`, please add the "hanami-validations" gem to your Gemfile)
+      %(To use `.params`, please add the "dry-validation" gem to your Gemfile)
     )
   end
 
@@ -35,7 +35,7 @@ RSpec.describe "Without validations" do
       end
     end.to raise_error(
       NoMethodError,
-      %(To use `.contract`, please add the "hanami-validations" gem to your Gemfile)
+      %(To use `.contract`, please add the "dry-validation" gem to your Gemfile)
     )
   end
 
@@ -48,7 +48,7 @@ RSpec.describe "Without validations" do
       end
     end.to raise_error(
       NoMethodError,
-      %(To use `.params`, please add the "hanami-validations" gem to your Gemfile)
+      %(To use `.params`, please add the "dry-validation" gem to your Gemfile)
     )
   end
 

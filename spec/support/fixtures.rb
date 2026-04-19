@@ -8,8 +8,6 @@ require "hanami/view/html"
 require "rack/session/cookie"
 require_relative "renderer"
 
-require_relative "validations"
-
 HTTP_TEST_STATUSES = {
   100 => "Continue",
   101 => "Switching Protocols",
@@ -620,11 +618,7 @@ end
 class AllowlistedParamsAction < Hanami::Action
   class Params < Hanami::Action::Params
     params do
-      if RSpec::Support::Validations.version?(2)
-        required(:id).maybe(:integer)
-      else
-        required(:id).maybe(:int?)
-      end
+      required(:id).maybe(:integer)
 
       required(:article).schema do
         required(:tags).each(:str?)
@@ -651,11 +645,7 @@ end
 
 class AllowlistedUploadDslAction < Hanami::Action
   params do
-    if RSpec::Support::Validations.version?(2)
-      required(:id).maybe(:integer)
-    else
-      required(:id).maybe(:int?)
-    end
+    required(:id).maybe(:integer)
     required(:upload).filled
   end
 
@@ -678,21 +668,12 @@ class TestParams < Hanami::Action::Params
   params do
     required(:email).filled(format?: /\A.+@.+\z/)
 
-    if RSpec::Support::Validations.version?(2)
-      optional(:password).filled(:str?)
-    else
-      optional(:password).filled(:str?).confirmation
-    end
+    optional(:password).filled(:str?)
 
     required(:name).filled
 
-    if RSpec::Support::Validations.version?(2)
-      required(:tos).value(:bool)
-      required(:age).value(:integer)
-    else
-      required(:tos).filled(:bool?)
-      required(:age).filled(:int?)
-    end
+    required(:tos).value(:bool)
+    required(:age).value(:integer)
 
     required(:address).schema do
       required(:line_one).filled
@@ -1328,11 +1309,7 @@ module FullStack
         include Inspector
 
         params do
-          if RSpec::Support::Validations.version?(2)
-            required(:id).value(:integer)
-          else
-            required(:id).value(:int?)
-          end
+          required(:id).value(:integer)
 
           required(:book).schema do
             required(:title).filled(:str?)

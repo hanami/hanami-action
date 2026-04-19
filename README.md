@@ -130,7 +130,7 @@ Params represent an untrusted input.
 For security reasons it's recommended to allowlist them.
 
 ```ruby
-require "hanami/validations"
+require "dry/validation"
 require "hanami/controller"
 
 class Signup < Hanami::Action
@@ -171,7 +171,7 @@ when params are invalid.
 If you specify the `:type` option, the param will be coerced.
 
 ```ruby
-require "hanami/validations"
+require "dry/validation"
 require "hanami/controller"
 
 class Signup < Hanami::Action
