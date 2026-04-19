@@ -19,7 +19,7 @@ end
 gem "hanami-utils", github: "hanami/utils", branch: "main"
 
 group :validations do
-  gem "hanami-validations", github: "hanami/validations", branch: "main"
+  gem "dry-validation", github: "dry-rb/dry-validation", branch: "main"
 end
 
 group :test do

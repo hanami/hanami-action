@@ -4,7 +4,7 @@ module Hanami
   class Action
     # Support for validating params when calling actions.
     #
-    # Included only when hanami-validations (and its dependencies) are bundled.
+    # Included only when dry-validation is bundled.
     #
     # @api private
     # @since 0.1.0

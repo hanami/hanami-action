@@ -50,7 +50,7 @@ module Hanami
 
     # Make conditional requires after Zeitwerk setup so any internal autoloading works as expected
     begin
-      require "hanami/validations"
+      require "dry/validation"
       require_relative "action/validatable"
     rescue LoadError # rubocop:disable Lint/SuppressedException
     end
@@ -110,7 +110,7 @@ module Hanami
       end
     end
 
-    # Placeholder for the `.params` method. Raises an error when the hanami-validations gem is not
+    # Placeholder for the `.params` method. Raises an error when the dry-validation gem is not
     # installed.
     #
     # @raise [NoMethodError]
@@ -118,11 +118,11 @@ module Hanami
     # @api public
     # @since 2.0.0
     def self.params(_klass = nil)
-      message = %(To use `.params`, please add the "hanami-validations" gem to your Gemfile)
+      message = %(To use `.params`, please add the "dry-validation" gem to your Gemfile)
       raise NoMethodError, message
     end
 
-    # Placeholder for the `.contract` method. Raises an error when the hanami-validations gem is not
+    # Placeholder for the `.contract` method. Raises an error when the dry-validation gem is not
     # installed.
     #
     # @raise [NoMethodError]
@@ -130,7 +130,7 @@ module Hanami
     # @api public
     # @since 2.2.0
     def self.contract
-      message = %(To use `.contract`, please add the "hanami-validations" gem to your Gemfile)
+      message = %(To use `.contract`, please add the "dry-validation" gem to your Gemfile)
       raise NoMethodError, message
     end
 

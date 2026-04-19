@@ -225,13 +225,7 @@ RSpec.describe Hanami::Action::Params do
 
       expect(params.errors.fetch(:signup).fetch(:name)).to eq(["is missing"])
 
-      with_hanami_validations(1) do
-        expect(params.error_messages).to eq(["Name is missing", "Age is missing", "Age must be greater than or equal to 18"])
-      end
-
-      with_hanami_validations(2) do
-        expect(params.error_messages).to eq(["Name is missing", "Age is missing"])
-      end
+      expect(params.error_messages).to eq(["Name is missing", "Age is missing"])
     end
 
     it "is it valid when all the validation criteria are met" do
