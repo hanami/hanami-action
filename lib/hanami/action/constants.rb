@@ -174,7 +174,7 @@ module Hanami
     #
     # @see Hanami::Action::Throwable::RACK_ERRORS
     # @see http://www.rubydoc.info/github/rack/rack/file/SPEC#The_Error_Stream
-    # @see https://github.com/hanami/controller/issues/133
+    # @see https://github.com/hanami/hanami-action/issues/133
     RACK_EXCEPTION = "rack.exception"
 
     # The HTTP header for redirects

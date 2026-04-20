@@ -1,11 +1,11 @@
 <!--- This file is synced from hanakai-rb/repo-sync -->
 
-[actions]: https://github.com/hanami/hanami-controller/actions
+[actions]: https://github.com/hanami/hanami-action/actions
 [chat]: https://discord.gg/naQApPAsZB
 [forum]: https://discourse.hanamirb.org
-[rubygem]: https://rubygems.org/gems/hanami-controller
+[rubygem]: https://rubygems.org/gems/hanami-action
 
-# Hanami Controller [![Gem Version](https://badge.fury.io/rb/hanami-controller.svg)][rubygem] [![CI Status](https://github.com/hanami/hanami-controller/workflows/CI/badge.svg)][actions]
+# Hanami Action [![Gem Version](https://badge.fury.io/rb/hanami-action.svg)][rubygem] [![CI Status](https://github.com/hanami/hanami-action/workflows/CI/badge.svg)][actions]
 
 [![Forum](https://img.shields.io/badge/Forum-dc360f?logo=discourse&logoColor=white)][forum]
 [![Chat](https://img.shields.io/badge/Chat-717cf8?logo=discord&logoColor=white)][chat]
@@ -15,7 +15,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem "hanami-controller"
+gem "hanami-action"
 ```
 
 And then execute:
@@ -27,12 +27,12 @@ $ bundle
 Or install it yourself as:
 
 ```shell
-$ gem install hanami-controller
+$ gem install hanami-action
 ```
 
 ## Usage
 
-Hanami::Controller is a micro library for web frameworks.
+Hanami::Action is a micro library for web frameworks.
 It works beautifully with [Hanami::Router](https://github.com/hanami/router), but it can be employed everywhere.
 It's designed to be fast and testable.
 
@@ -77,7 +77,7 @@ class Show < Hanami::Action
   attr_reader :repository
 end
 
-configuration = Hanami::Controller::Configuration.new
+configuration = Hanami::Action::Configuration.new
 action = Show.new(configuration: configuration, repository: ArticleRepository.new)
 action.call(id: 23)
 ```
@@ -131,7 +131,7 @@ For security reasons it's recommended to allowlist them.
 
 ```ruby
 require "dry/validation"
-require "hanami/controller"
+require "hanami/action"
 
 class Signup < Hanami::Action
   params do
@@ -172,7 +172,7 @@ If you specify the `:type` option, the param will be coerced.
 
 ```ruby
 require "dry/validation"
-require "hanami/controller"
+require "hanami/action"
 
 class Signup < Hanami::Action
   MEGABYTE = 1024 ** 2
@@ -282,7 +282,7 @@ end
 
 ### Exceptions management
 
-When the app raises an exception, `hanami-controller`, does **NOT** manage it.
+When the app raises an exception, `hanami-action`, does **NOT** manage it.
 You can write custom exception handling on per action or configuration basis.
 
 An exception handler can be a valid HTTP status code (eg. `500`, `401`), or a `Symbol` that represents an action method.
@@ -340,7 +340,7 @@ action.call({}) # => [400, {}, ["Invalid arguments"]]
 Exception policies can be defined globally via configuration:
 
 ```ruby
-configuration = Hanami::Controller::Configuration.new do |config|
+configuration = Hanami::Action::Configuration.new do |config|
   config.handle_exception RecordNotFound => 404
 end
 
@@ -445,7 +445,7 @@ If you want to send cookies in the response, use `response.cookies`.
 They are read as a Hash from Rack env:
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/cookies"
 
 class ReadCookiesFromRackEnv < Hanami::Action
@@ -464,7 +464,7 @@ action.call({"HTTP_COOKIE" => "foo=bar"})
 They are set like a Hash:
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/cookies"
 
 class SetCookies < Hanami::Action
@@ -483,7 +483,7 @@ action.call({}) # => [200, {"Set-Cookie" => "foo=bar"}, "..."]
 They are removed by setting their value to `nil`:
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/cookies"
 
 class RemoveCookies < Hanami::Action
@@ -502,10 +502,10 @@ action.call({}) # => [200, {"Set-Cookie" => "foo=; max-age=0; expires=Thu, 01 Ja
 Default values can be set in configuration, but overridden case by case.
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/cookies"
 
-configuration = Hanami::Controller::Configuration.new do |config|
+configuration = Hanami::Action::Configuration.new do |config|
   config.cookies(max_age: 300) # 5 minutes
 end
 
@@ -529,7 +529,7 @@ Similarly to cookies, you can read the session sent by the HTTP client via
 `request.session`, and also manipulate it via `response.session`.
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/session"
 
 class ReadSessionFromRackEnv < Hanami::Action
@@ -548,7 +548,7 @@ action.call({ "rack.session" => { "age" => "35" } })
 Values can be set like a Hash:
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/session"
 
 class SetSession < Hanami::Action
@@ -567,7 +567,7 @@ action.call({}) # => [200, {"Set-Cookie"=>"rack.session=..."}, "..."]
 Values can be removed like a Hash:
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/session"
 
 class RemoveSession < Hanami::Action
@@ -583,7 +583,7 @@ action = RemoveSession.new(configuration: configuration)
 action.call({}) # => [200, {"Set-Cookie"=>"rack.session=..."}, "..."] it removes that value from the session
 ```
 
-While Hanami::Controller supports sessions natively, it's **session store agnostic**.
+While Hanami::Action supports sessions natively, it's **session store agnostic**.
 You have to specify the session store in your Rack middleware configuration (eg `config.ru`).
 
 ```ruby
@@ -593,15 +593,15 @@ run Show.new(configuration: configuration)
 
 ### HTTP Cache
 
-Hanami::Controller sets your headers correctly according to RFC 2616 / 14.9 for more on standard cache control directives: http://tools.ietf.org/html/rfc2616#section-14.9.1
+Hanami::Action sets your headers correctly according to RFC 2616 / 14.9 for more on standard cache control directives: http://tools.ietf.org/html/rfc2616#section-14.9.1
 
 You can easily set the Cache-Control header for your actions:
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/cache"
 
-class HttpCacheController < Hanami::Action
+class HttpCacheAction < Hanami::Action
   include Hanami::Action::Cache
   cache_control :public, max_age: 600 # => Cache-Control: public, max-age=600
 
@@ -614,10 +614,10 @@ end
 Expires header can be specified using `expires` method:
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/cache"
 
-class HttpCacheController < Hanami::Action
+class HttpCacheAction < Hanami::Action
   include Hanami::Action::Cache
   expires 60, :public, max_age: 600 # => Expires: Sun, 03 Aug 2014 17:47:02 GMT, Cache-Control: public, max-age=600
 
@@ -636,10 +636,10 @@ Passing the `HTTP_IF_NONE_MATCH` (content identifier) or `HTTP_IF_MODIFIED_SINCE
 You can easily take advantage of Conditional Get using `#fresh` method:
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/cache"
 
-class ConditionalGetController < Hanami::Action
+class ConditionalGetAction < Hanami::Action
   include Hanami::Action::Cache
 
   def handle(*)
@@ -655,10 +655,10 @@ If `resource.cache_key` is equal to `IfNoneMatch` header, then hanami will `halt
 An alternative to hashing based check, is the time based check:
 
 ```ruby
-require "hanami/controller"
+require "hanami/action"
 require "hanami/action/cache"
 
-class ConditionalGetController < Hanami::Action
+class ConditionalGetAction < Hanami::Action
   include Hanami::Action::Cache
 
   def handle(*)
@@ -780,11 +780,11 @@ class Show < Hanami::Action
 end
 ```
 
-Hanami::Controller is shipped with an extensive list of the most common MIME types.
+Hanami::Action is shipped with an extensive list of the most common MIME types.
 Also, you can register your own:
 
 ```ruby
-configuration = Hanami::Controller::Configuration.new do |config|
+configuration = Hanami::Action::Configuration.new do |config|
   config.format custom: "application/custom"
 end
 
@@ -816,7 +816,7 @@ response.format                                    # => :custom
 When the work to be done by the server takes time, it may be a good idea to stream your response. Here's an example of a streamed CSV.
 
 ```ruby
-configuration = Hanami::Controller::Configuration.new do |config|
+configuration = Hanami::Action::Configuration.new do |config|
   config.format csv: 'text/csv'
 end
 
@@ -841,88 +841,12 @@ Note:
 
 ### No rendering, please
 
-Hanami::Controller is designed to be a pure HTTP endpoint, rendering belongs to other layers of MVC.
+Hanami::Action is designed to be a pure HTTP endpoint, rendering belongs to other layers of MVC.
 You can set the body directly (see [response](#response)), or use [Hanami::View](https://github.com/hanami/view).
-
-### Controllers
-
-A Controller is nothing more than a logical group of actions: just a Ruby module.
-
-```ruby
-module Articles
-  class Index < Hanami::Action
-    # ...
-  end
-
-  class Show < Hanami::Action
-    # ...
-  end
-end
-
-Articles::Index.new(configuration: configuration).call({})
-```
-
-### Hanami::Router integration
-
-```ruby
-require "hanami/router"
-require "hanami/controller"
-
-module Web
-  module Controllers
-    module Books
-      class Show < Hanami::Action
-        def handle(*)
-        end
-      end
-    end
-  end
-end
-
-configuration = Hanami::Controller::Configuration.new
-router = Hanami::Router.new(configuration: configuration, namespace: Web::Controllers) do
-  get "/books/:id", "books#show"
-end
-```
 
 ### Rack integration
 
-Hanami::Controller is compatible with Rack. If you need to use any Rack middleware, please mount them in `config.ru`.
-
-### Configuration
-
-Hanami::Controller can be configured via `Hanami::Controller::Configuration`.
-It supports a few options:
-
-```ruby
-require "hanami/controller"
-
-configuration = Hanami::Controller::Configuration.new do |config|
-  # If the given exception is raised, return that HTTP status
-  # It can be used multiple times
-  # Argument: hash, empty by default
-  #
-  config.handle_exception ArgumentError => 404
-
-  # Register a format to MIME type mapping
-  # Argument: hash, key: format symbol, value: MIME type string, empty by default
-  #
-  config.format custom: "application/custom"
-
-  # Define a default format to set as `Content-Type` header for response,
-  # unless otherwise specified.
-  # If not defined here, it will return Rack's default: `application/octet-stream`
-  # Argument: symbol, it should be already known. defaults to `nil`
-  #
-  config.default_response_format = :html
-
-  # Define a default charset to return in the `Content-Type` response header
-  # If not defined here, it returns `utf-8`
-  # Argument: string, defaults to `nil`
-  #
-  config.default_charset = "koi8-r"
-end
-```
+Hanami::Action is compatible with Rack. If you need to use any Rack middleware, please mount them in `config.ru`.
 
 ### Thread safety
 
@@ -939,10 +863,8 @@ An Action is **immutable**, it works without global state, so it's thread-safe b
 ## Links
 
 - [User documentation](https://hanamirb.org)
-- [API documentation](http://rubydoc.info/gems/hanami-controller)
-
+- [API documentation](http://rubydoc.info/gems/hanami-action)
 
 ## License
 
 See `LICENSE` file.
-

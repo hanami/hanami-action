@@ -114,7 +114,7 @@ RSpec.describe "MIME Type" do
       end
     end
 
-    # See https://github.com/hanami/controller/issues/225
+    # See https://github.com/hanami/hanami-action/issues/225
     context "with an accepted format and default response format" do
       let(:app) { Rack::MockRequest.new(MimesWithDefault::Application.new) }
       let(:response) { app.get("/default_and_accept", "CONTENT_TYPE" => "application/json") }

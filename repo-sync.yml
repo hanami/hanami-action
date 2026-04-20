@@ -1,7 +1,7 @@
 name:
-  gem: hanami-controller
-  constant: Hanami::Controller
-  title: Hanami Controller
+  gem: hanami-action
+  constant: Hanami::Action
+  title: Hanami Action
 github_org: hanami
 ci:
   matrix:

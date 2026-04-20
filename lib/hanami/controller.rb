@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require "hanami/action"
-require "hanami/controller/version"
+
+# TODO: add deprecation notice for this file
 
 # Hanami
 #

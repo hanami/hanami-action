@@ -277,9 +277,9 @@ module Hanami
         #
         # @see http://www.rubydoc.info/gems/rack/Rack/Utils#best_q_match-class_method
         # @see https://github.com/rack/rack/pull/659
-        # @see https://github.com/hanami/controller/issues/59
-        # @see https://github.com/hanami/controller/issues/104
-        # @see https://github.com/hanami/controller/issues/275
+        # @see https://github.com/hanami/hanami-action/issues/59
+        # @see https://github.com/hanami/hanami-action/issues/104
+        # @see https://github.com/hanami/hanami-action/issues/275
         def best_q_match(q_value_header, available_mimes)
           ::Rack::Utils.q_values(q_value_header).each_with_index.map { |(req_mime, quality), index|
             match = available_mimes.find { |am| ::Rack::Mime.match?(am, req_mime) }

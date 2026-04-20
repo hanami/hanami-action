@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Hanami
-  module Controller
-    # The current hanami-controller version.
+  class Action
+    # The current hanami-action version.
     #
     # @return [String]
     #
