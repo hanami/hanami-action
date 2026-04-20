@@ -10,6 +10,9 @@
 [![Forum](https://img.shields.io/badge/Forum-dc360f?logo=discourse&logoColor=white)][forum]
 [![Chat](https://img.shields.io/badge/Chat-717cf8?logo=discord&logoColor=white)][chat]
 
+> [!NOTE]
+> **Hanami Controller has been renamed to Hanami Action.**
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -32,9 +35,7 @@ $ gem install hanami-action
 
 ## Usage
 
-Hanami::Action is a micro library for web frameworks.
-It works beautifully with [Hanami::Router](https://github.com/hanami/router), but it can be employed everywhere.
-It's designed to be fast and testable.
+Hanami Action is a micro library for web frameworks. It works beautifully with [Hanami Router](https://github.com/hanami/router), but it can be employed everywhere. It's designed to be fast and testable.
 
 ### Actions
 
