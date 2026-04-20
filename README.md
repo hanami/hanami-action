@@ -866,6 +866,8 @@ An Action is **immutable**, it works without global state, so it's thread-safe b
 - [User documentation](https://hanamirb.org)
 - [API documentation](http://rubydoc.info/gems/hanami-action)
 
+
 ## License
 
 See `LICENSE` file.
+
