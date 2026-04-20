@@ -4,28 +4,28 @@
 
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "hanami/controller/version"
+require "hanami/action/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "hanami-controller"
+  spec.name          = "hanami-action"
   spec.authors       = ["Hanakai team"]
   spec.email         = ["info@hanakai.org"]
   spec.license       = "MIT"
-  spec.version       = Hanami::Controller::VERSION.dup
+  spec.version       = Hanami::Action::VERSION.dup
 
   spec.summary       = "Complete, fast and testable actions for Rack and Hanami"
   spec.description   = spec.summary
   spec.homepage      = "https://hanamirb.org"
-  spec.files         = Dir["CHANGELOG.md", "LICENSE", "README.md", "hanami-controller.gemspec", "lib/**/*"]
+  spec.files         = Dir["CHANGELOG.md", "LICENSE", "README.md", "hanami-action.gemspec", "lib/**/*"]
   spec.bindir        = "exe"
   spec.executables   = Dir["exe/*"].map { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
   spec.extra_rdoc_files = ["README.md", "CHANGELOG.md", "LICENSE"]
 
-  spec.metadata["changelog_uri"]     = "https://github.com/hanami/hanami-controller/blob/main/CHANGELOG.md"
-  spec.metadata["source_code_uri"]   = "https://github.com/hanami/hanami-controller"
-  spec.metadata["bug_tracker_uri"]   = "https://github.com/hanami/hanami-controller/issues"
+  spec.metadata["changelog_uri"]     = "https://github.com/hanami/hanami-action/blob/main/CHANGELOG.md"
+  spec.metadata["source_code_uri"]   = "https://github.com/hanami/hanami-action"
+  spec.metadata["bug_tracker_uri"]   = "https://github.com/hanami/hanami-action/issues"
   spec.metadata["funding_uri"]       = "https://github.com/sponsors/hanami"
 
   spec.required_ruby_version = ">= 3.2"
@@ -36,4 +36,3 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "dry-core", "~> 1.0"
   spec.add_runtime_dependency "zeitwerk", "~> 2.6"
 end
-

@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module Hanami
-  module Controller
-    # The current hanami-controller version.
+  class Action
+    # The current hanami-action version.
     #
     # @return [String]
     #
-    # @since 0.1.0
+    # @since 3.0.0
     # @api public
-    VERSION = "2.3.1"
+    VERSION = "3.0.0"
   end
 end

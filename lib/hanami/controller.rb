@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "hanami/action"
-require "hanami/controller/version"
 
 # Hanami
 #
@@ -16,3 +15,9 @@ module Hanami
   module Controller
   end
 end
+
+warn(
+  "`require \"hanami/controller\"` is deprecated and will be removed in Hanami 3.1. " \
+  "Use `require \"hanami/action\"` instead.",
+  category: :deprecated
+)

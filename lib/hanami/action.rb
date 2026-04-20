@@ -12,6 +12,7 @@ require "zeitwerk"
 
 require_relative "action/constants"
 require_relative "action/errors"
+require_relative "action/version"
 
 module Hanami
   # An HTTP endpoint
@@ -19,7 +20,7 @@ module Hanami
   # @since 0.1.0
   #
   # @example
-  #   require "hanami/controller"
+  #   require "hanami/action"
   #
   #   class Show < Hanami::Action
   #     def handle(req, res)
@@ -34,12 +35,13 @@ module Hanami
     def self.gem_loader
       @gem_loader ||= Zeitwerk::Loader.new.tap do |loader|
         root = File.expand_path("..", __dir__)
-        loader.tag = "hanami-controller"
-        loader.inflector = Zeitwerk::GemInflector.new("#{root}/hanami-controller.rb")
+        loader.tag = "hanami-action"
+        loader.inflector = Zeitwerk::GemInflector.new("#{root}/hanami-action.rb")
         loader.push_dir(root)
         loader.ignore(
+          "#{root}/hanami-action.rb",
           "#{root}/hanami-controller.rb",
-          "#{root}/hanami/controller/version.rb",
+          "#{root}/hanami/action/version.rb",
           "#{root}/hanami/action/{constants,errors,validatable}.rb"
         )
         loader.inflector.inflect("csrf_protection" => "CSRFProtection")

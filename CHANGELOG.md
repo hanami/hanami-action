@@ -11,6 +11,8 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Changed
 
+- Renamed gem from hanami-controller to hanami-action. You should now `require "hanami-action"` or `require "hanami/action"`. (@timriley in #507)
+
 ### Deprecated
 
 ### Removed
@@ -19,7 +21,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Security
 
-[Unreleased]: https://github.com/hanami/hanami-controller/compare/v2.3.1...main
+[Unreleased]: https://github.com/hanami/hanami-action/compare/v2.3.1...main
 
 ## [2.3.1] - 2025-12-06
 
@@ -36,7 +38,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
   end
   ```
 
-[2.3.1]: https://github.com/hanami/hanami-controller/compare/v2.3.0...v2.3.1
+[2.3.1]: https://github.com/hanami/hanami-action/compare/v2.3.0...v2.3.1
 
 ## [2.3.0] - 2025-11-12
 
@@ -64,7 +66,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
   end
   ```
 
-[2.3.0]: https://github.com/hanami/hanami-controller/compare/v2.3.0.beta2...v2.3.0
+[2.3.0]: https://github.com/hanami/hanami-action/compare/v2.3.0.beta2...v2.3.0
 
 ## [2.3.0.beta2] - 2025-10-17
 
@@ -139,7 +141,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - `Action.format`, `config.format`, `config.formats.add`, `config.formats.values`, and `config.formats.values=` are deprecated and will be removed in Hanami 2.4. (Tim Riley in #485)
 - Drop support for Ruby 3.1. (Tim Riley in #485)
 
-[2.3.0.beta2]: https://github.com/hanami/hanami-controller/compare/v2.3.0.beta1...v2.3.0.beta2
+[2.3.0.beta2]: https://github.com/hanami/hanami-action/compare/v2.3.0.beta1...v2.3.0.beta2
 
 ## [2.3.0.beta1] - 2025-10-03
 
@@ -156,7 +158,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Avoid false negatives in format/content type matches by checking against the request's media type, which excludes content type parameters (e.g. "test/plain" instead of "text/plain;charset=utf-8"). (wuarmin in #471)
 
-[2.3.0.beta1]: https://github.com/hanami/hanami-controller/compare/v2.2.0...v2.3.0.beta1
+[2.3.0.beta1]: https://github.com/hanami/hanami-action/compare/v2.2.0...v2.3.0.beta1
 
 ## [2.2.0] - 2024-11-05
 
@@ -164,11 +166,11 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - When an action is called, add the action instance to the Rack environment under the `"hanami.action_instance"` key. (Tom de Bruijn, Tim Riley in #446)
 
-[2.2.0]: https://github.com/hanami/hanami-controller/compare/v2.2.0.rc1...v2.2.0
+[2.2.0]: https://github.com/hanami/hanami-action/compare/v2.2.0.rc1...v2.2.0
 
 ## [2.2.0.rc1] - 2024-10-29
 
-[2.2.0.rc1]: https://github.com/hanami/hanami-controller/compare/v2.2.0.beta2...v2.2.0.rc1
+[2.2.0.rc1]: https://github.com/hanami/hanami-action/compare/v2.2.0.beta2...v2.2.0.rc1
 
 ## [2.2.0.beta2] - 2024-09-25
 
@@ -176,7 +178,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Add support for using full dry-validation contracts for action param validation, via `Hanami::Action.contract`. (Tim Riley, Krzysztof Piotrowski in #453, #454)
 
-[2.2.0.beta2]: https://github.com/hanami/hanami-controller/compare/v2.2.0.beta1...v2.2.0.beta2
+[2.2.0.beta2]: https://github.com/hanami/hanami-action/compare/v2.2.0.beta1...v2.2.0.beta2
 
 ## [2.2.0.beta1] - 2024-07-16
 
@@ -184,19 +186,19 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Drop support for Ruby 3.0. (Tim Riley in #454)
 
-[2.2.0.beta1]: https://github.com/hanami/hanami-controller/compare/v2.1.0...v2.2.0.beta1
+[2.2.0.beta1]: https://github.com/hanami/hanami-action/compare/v2.1.0...v2.2.0.beta1
 
 ## [2.1.0] - 2024-02-27
 
-[2.1.0]: https://github.com/hanami/hanami-controller/compare/v2.1.0.rc3...v2.1.0
+[2.1.0]: https://github.com/hanami/hanami-action/compare/v2.1.0.rc3...v2.1.0
 
 ## [2.1.0.rc3] - 2024-02-16
 
-[2.1.0.rc3]: https://github.com/hanami/hanami-controller/compare/v2.1.0.rc2...v2.1.0.rc3
+[2.1.0.rc3]: https://github.com/hanami/hanami-action/compare/v2.1.0.rc2...v2.1.0.rc3
 
 ## [2.1.0.rc2] - 2023-11-08
 
-[2.1.0.rc2]: https://github.com/hanami/hanami-controller/compare/v2.1.0.rc1...v2.1.0.rc2
+[2.1.0.rc2]: https://github.com/hanami/hanami-action/compare/v2.1.0.rc1...v2.1.0.rc2
 
 ## [2.1.0.rc1] - 2023-11-01
 
@@ -204,7 +206,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Ensure Rack compatibility of `Hanami::Action::Response#send_file`. (Luca Guidi in #431)
 
-[2.1.0.rc1]: https://github.com/hanami/hanami-controller/compare/v2.1.0.beta2...v2.1.0.rc1
+[2.1.0.rc1]: https://github.com/hanami/hanami-action/compare/v2.1.0.beta2...v2.1.0.rc1
 
 ## [2.1.0.beta2] - 2023-10-04
 
@@ -212,7 +214,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - `Hanami::Action::Config#root`: don't check realpath existence to simplify the boot process of Hanami. (Luca Guidi in #429)
 
-[2.1.0.beta2]: https://github.com/hanami/hanami-controller/compare/v2.1.0.beta1...v2.1.0.beta2
+[2.1.0.beta2]: https://github.com/hanami/hanami-action/compare/v2.1.0.beta1...v2.1.0.beta2
 
 ## [2.1.0.beta1] - 2023-06-29
 
@@ -220,7 +222,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Add `Request#session_enabled?` and `Response#session_enabled?`. (Tim Riley in #423)
 
-[2.1.0.beta1]: https://github.com/hanami/hanami-controller/compare/v2.0.2...v2.1.0.beta1
+[2.1.0.beta1]: https://github.com/hanami/hanami-action/compare/v2.0.2...v2.1.0.beta1
 
 ## [2.0.2] - 2023-02-01
 
@@ -236,7 +238,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Halting with an unknown HTTP code will raise a `Hanami::Action::UnknownHttpStatusError`. (Luca Guidi in #418)
 - Fix error message for missing format (MIME Type). (Luca Guidi in #418)
 
-[2.0.2]: https://github.com/hanami/hanami-controller/compare/v2.0.1...v2.0.2
+[2.0.2]: https://github.com/hanami/hanami-action/compare/v2.0.1...v2.0.2
 
 ## [2.0.1] - 2022-12-25
 
@@ -244,7 +246,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Official support for Ruby 3.2. (Luca Guidi in #408)
 
-[2.0.1]: https://github.com/hanami/hanami-controller/compare/v2.0.0...v2.0.1
+[2.0.1]: https://github.com/hanami/hanami-action/compare/v2.0.0...v2.0.1
 
 ## [2.0.0] - 2022-11-22
 
@@ -259,7 +261,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Removed `Hanami::Action::Config#default_request_format` and `#default_response_format`, use `#format` for both. (Tim Riley in #401)
 - Removed `Hanami::Action::Config#accept`, use `#format`. (Tim Riley in #401)
 
-[2.0.0]: https://github.com/hanami/hanami-controller/compare/v2.0.0.rc1...v2.0.0
+[2.0.0]: https://github.com/hanami/hanami-action/compare/v2.0.0.rc1...v2.0.0
 
 ## [2.0.0.rc1] - 2022-11-08
 
@@ -267,7 +269,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Simplify assignment of response format: `response.format = :json` (was `response.format = format(:json)`). (Tim Riley in #400)
 
-[2.0.0.rc1]: https://github.com/hanami/hanami-controller/compare/v2.0.0.beta4...v2.0.0.rc1
+[2.0.0.rc1]: https://github.com/hanami/hanami-action/compare/v2.0.0.beta4...v2.0.0.rc1
 
 ## [2.0.0.beta4] - 2022-10-24
 
@@ -288,7 +290,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - When a params validation schema is provided (in a `params do` block), only return the validated params from `request.params`. (Benjamin Klotz in #375)
 - Handle dry-schema's messages hash now being frozen by default. (Sean Collins in #391)
 
-[2.0.0.beta4]: https://github.com/hanami/hanami-controller/compare/v2.0.0.beta1...v2.0.0.beta4
+[2.0.0.beta4]: https://github.com/hanami/hanami-action/compare/v2.0.0.beta1...v2.0.0.beta4
 
 ## [2.0.0.beta1] - 2022-07-20
 
@@ -299,7 +301,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Ensure HEAD redirect responses to return redirect headers. (Narinda Reeders in #368)
 - Do not automatically render halted requests. (Andrew Croome in #364)
 
-[2.0.0.beta1]: https://github.com/hanami/hanami-controller/compare/v2.0.0.alpha8...v2.0.0.beta1
+[2.0.0.beta1]: https://github.com/hanami/hanami-action/compare/v2.0.0.alpha8...v2.0.0.beta1
 
 ## [2.0.0.alpha8] - 2022-02-19
 
@@ -307,7 +309,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Removed automatic integration of `Hanami::Action` subclasses with their surrounding Hanami application. Action base classes within Hanami apps should inherit from `Hanami::Application::Action` instead. (Tim Riley in #362)
 
-[2.0.0.alpha8]: https://github.com/hanami/hanami-controller/compare/v2.0.0.alpha6...v2.0.0.alpha8
+[2.0.0.alpha8]: https://github.com/hanami/hanami-action/compare/v2.0.0.alpha6...v2.0.0.alpha8
 
 ## [2.0.0.alpha6] - 2022-02-10
 
@@ -320,7 +322,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Drop support for Ruby: MRI 2.6, and 2.7. (Luca Guidi in #359)
 - Align with Rack list of HTTP supported status. Added: `103`, `306`, `421`, `425`, `451`, and `509`. Removed: `418`, `420`, `444`, `449`, `450`, `451`, `499`, `598`, `599`. (Sean Collins in #358)
 
-[2.0.0.alpha6]: https://github.com/hanami/hanami-controller/compare/v2.0.0.alpha5...v2.0.0.alpha6
+[2.0.0.alpha6]: https://github.com/hanami/hanami-action/compare/v2.0.0.alpha5...v2.0.0.alpha6
 
 ## [2.0.0.alpha5] - 2022-01-12
 
@@ -328,7 +330,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Added "rss" ("application/rss+xml") to list of supported MIME types. (Philip Arndt in #357)
 
-[2.0.0.alpha5]: https://github.com/hanami/hanami-controller/compare/v2.0.0.alpha4...v2.0.0.alpha5
+[2.0.0.alpha5]: https://github.com/hanami/hanami-action/compare/v2.0.0.alpha4...v2.0.0.alpha5
 
 ## [2.0.0.alpha4] - 2021-12-07
 
@@ -337,7 +339,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Manage Content Security Policy (CSP) defaults and new API via `Hanami::Action::ApplicationConfiguration#content_security_policy`. (Luca Guidi in #354)
 - Provide access to routes inside all application actions via `Hanami::Action::ApplicationAction#routes`. (Tim Riley & Marc Busqué in #352)
 
-[2.0.0.alpha4]: https://github.com/hanami/hanami-controller/compare/v2.0.0.alpha3...v2.0.0.alpha4
+[2.0.0.alpha4]: https://github.com/hanami/hanami-action/compare/v2.0.0.alpha3...v2.0.0.alpha4
 
 ## [2.0.0.alpha3] - 2021-11-09
 
@@ -351,7 +353,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - (Internal) Updated settings to use updated `setting` API in dry-configurable 0.13.0. (Tim Riley in #346)
 - Move automatic view rendering from `handle` to `finish`. (Sean Collins in #348)
 
-[2.0.0.alpha3]: https://github.com/hanami/hanami-controller/compare/v2.0.0.alpha2...v2.0.0.alpha3
+[2.0.0.alpha3]: https://github.com/hanami/hanami-action/compare/v2.0.0.alpha2...v2.0.0.alpha3
 
 ## [2.0.0.alpha2] - 2021-05-04
 
@@ -376,7 +378,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Ensure `Hanami::Action::Response#renderable?` to return `false` when body is set. (Luca Guidi in #325)
 - Ensure `Hanami::Action.accept` to use Rack `CONTENT_TYPE` for the _before callback_ check. (Andrew Croome in #325)
 
-[2.0.0.alpha2]: https://github.com/hanami/hanami-controller/compare/v2.0.0.alpha1...v2.0.0.alpha2
+[2.0.0.alpha2]: https://github.com/hanami/hanami-action/compare/v2.0.0.alpha1...v2.0.0.alpha2
 
 ## [2.0.0.alpha1] - 2019-01-30
 
@@ -430,7 +432,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - When an exception is raised, it won't be caught, unless it's handled. (Luca Guidi in #281)
 - `Hanami::Action` exception handlers now accept `Hanami::Action::Request`, `Hanami::Action::Response`, and exception arguments. (Luca Guidi in #281)
 
-[2.0.0.alpha1]: https://github.com/hanami/hanami-controller/compare/v1.3.3...v2.0.0.alpha1
+[2.0.0.alpha1]: https://github.com/hanami/hanami-action/compare/v1.3.3...v2.0.0.alpha1
 
 ## [1.3.3] - 2020-01-14
 
@@ -440,7 +442,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Support `rack` 2.1. (Luca Guidi in #323)
 - Support for both `hanami-validations` 1 and 2. (Luca Guidi in #323)
 
-[1.3.3]: https://github.com/hanami/hanami-controller/compare/v1.3.2...v1.3.3
+[1.3.3]: https://github.com/hanami/hanami-action/compare/v1.3.2...v1.3.3
 
 ## [1.3.2] - 2019-06-28
 
@@ -448,7 +450,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Ensure `Etag` to work when `If-Modified-Since` is sent from browser and upstream proxy sets `Last-Modified` automatically. (Ian Ker-Seymer in #321)
 
-[1.3.2]: https://github.com/hanami/hanami-controller/compare/v1.3.1...v1.3.2
+[1.3.2]: https://github.com/hanami/hanami-action/compare/v1.3.1...v1.3.2
 
 ## [1.3.1] - 2019-01-18
 
@@ -457,7 +459,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Official support for Ruby: MRI 2.6. (Luca Guidi in #317)
 - Support `bundler` 2.0+. (Luca Guidi in #317)
 
-[1.3.1]: https://github.com/hanami/hanami-controller/compare/v1.3.0...v1.3.1
+[1.3.1]: https://github.com/hanami/hanami-action/compare/v1.3.0...v1.3.1
 
 ## [1.3.0] - 2018-10-24
 
@@ -465,7 +467,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Swappable JSON backed for `Hanami::Action::Flash` based on `Hanami::Utils::Json`. (Gustavo Caso in #306)
 
-[1.3.0]: https://github.com/hanami/hanami-controller/compare/v1.3.0.beta1...v1.3.0
+[1.3.0]: https://github.com/hanami/hanami-action/compare/v1.3.0.beta1...v1.3.0
 
 ## [1.3.0.beta1] - 2018-08-08
 
@@ -483,11 +485,11 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Don't show flash message for the request after a HTTP redirect. (Gustavo Caso in #301)
 - Ensure `Hanami::Action::Flash#each`, `#map`, and `#empty?` to not reference stale flash data. (Gustavo Caso in #301)
 
-[1.3.0.beta1]: https://github.com/hanami/hanami-controller/compare/v1.2.0...v1.3.0.beta1
+[1.3.0.beta1]: https://github.com/hanami/hanami-action/compare/v1.2.0...v1.3.0.beta1
 
 ## [1.2.0] - 2018-04-11
 
-[1.2.0]: https://github.com/hanami/hanami-controller/compare/v1.2.0.rc2...v1.2.0
+[1.2.0]: https://github.com/hanami/hanami-action/compare/v1.2.0.rc2...v1.2.0
 
 ## [1.2.0.rc2] - 2018-04-06
 
@@ -495,15 +497,15 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Introduce `Hanami::Action::Flash#each` and `#map`. (Gustavo Caso in #294)
 
-[1.2.0.rc2]: https://github.com/hanami/hanami-controller/compare/v1.2.0.rc1...v1.2.0.rc2
+[1.2.0.rc2]: https://github.com/hanami/hanami-action/compare/v1.2.0.rc1...v1.2.0.rc2
 
 ## [1.2.0.rc1] - 2018-03-30
 
-[1.2.0.rc1]: https://github.com/hanami/hanami-controller/compare/v1.2.0.beta2...v1.2.0.rc1
+[1.2.0.rc1]: https://github.com/hanami/hanami-action/compare/v1.2.0.beta2...v1.2.0.rc1
 
 ## [1.2.0.beta2] - 2018-03-23
 
-[1.2.0.beta2]: https://github.com/hanami/hanami-controller/compare/v1.2.0.beta1...v1.2.0.beta2
+[1.2.0.beta2]: https://github.com/hanami/hanami-action/compare/v1.2.0.beta1...v1.2.0.beta2
 
 ## [1.2.0.beta1] - 2018-02-28
 
@@ -516,7 +518,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Raise meaningful exception when trying to access `session` or `flash` and `Hanami::Action::Session` wasn't included. (wheresmyjetpack in #207)
 
-[1.2.0.beta1]: https://github.com/hanami/hanami-controller/compare/v1.1.1...v1.2.0.beta1
+[1.2.0.beta1]: https://github.com/hanami/hanami-action/compare/v1.1.1...v1.2.0.beta1
 
 ## [1.1.1] - 2017-11-22
 
@@ -525,7 +527,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Ensure `Hanami::Action#send_file` and `#unsafe_send_file` to run `after` action callbacks. (Luca Guidi in #282)
 - Ensure Rack env to have the `REQUEST_METHOD` key set to `GET` during actions unit tests. (Luca Guidi in #282)
 
-[1.1.1]: https://github.com/hanami/hanami-controller/compare/v1.1.0...v1.1.1
+[1.1.1]: https://github.com/hanami/hanami-action/compare/v1.1.0...v1.1.1
 
 ## [1.1.0] - 2017-10-25
 
@@ -533,15 +535,15 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Introduce `Hanami::Action::CookieJar#each` to iterate through action's `cookies`. (Luca Guidi in #279)
 
-[1.1.0]: https://github.com/hanami/hanami-controller/compare/v1.1.0.rc1...v1.1.0
+[1.1.0]: https://github.com/hanami/hanami-action/compare/v1.1.0.rc1...v1.1.0
 
 ## [1.1.0.rc1] - 2017-10-16
 
-[1.1.0.rc1]: https://github.com/hanami/hanami-controller/compare/v1.1.0.beta3...v1.1.0.rc1
+[1.1.0.rc1]: https://github.com/hanami/hanami-action/compare/v1.1.0.beta3...v1.1.0.rc1
 
 ## [1.1.0.beta3] - 2017-10-04
 
-[1.1.0.beta3]: https://github.com/hanami/hanami-controller/compare/v1.1.0.beta2...v1.1.0.beta3
+[1.1.0.beta3]: https://github.com/hanami/hanami-action/compare/v1.1.0.beta2...v1.1.0.beta3
 
 ## [1.1.0.beta2] - 2017-10-03
 
@@ -549,11 +551,11 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Introduce `Hanami::Action::Params::Errors#add` to add errors not generated by params validations. (Luca Guidi in #276)
 
-[1.1.0.beta2]: https://github.com/hanami/hanami-controller/compare/v1.1.0.beta1...v1.1.0.beta2
+[1.1.0.beta2]: https://github.com/hanami/hanami-action/compare/v1.1.0.beta1...v1.1.0.beta2
 
 ## [1.1.0.beta1] - 2017-08-11
 
-[1.1.0.beta1]: https://github.com/hanami/hanami-controller/compare/v1.0.1...v1.1.0.beta1
+[1.1.0.beta1]: https://github.com/hanami/hanami-action/compare/v1.0.1...v1.1.0.beta1
 
 ## [1.0.1] - 2017-07-10
 
@@ -562,15 +564,15 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Ensure validation params to be symbolized in all the environments. (Marcello Rocha in #269)
 - Fix regression (`1.0.0`) about MIME type priority, during the evaluation of a weighted `Accept` HTTP header. (Marcello Rocha in #269)
 
-[1.0.1]: https://github.com/hanami/hanami-controller/compare/v1.0.0...v1.0.1
+[1.0.1]: https://github.com/hanami/hanami-action/compare/v1.0.0...v1.0.1
 
 ## [1.0.0] - 2017-04-06
 
-[1.0.0]: https://github.com/hanami/hanami-controller/compare/v1.0.0.rc1...v1.0.0
+[1.0.0]: https://github.com/hanami/hanami-action/compare/v1.0.0.rc1...v1.0.0
 
 ## [1.0.0.rc1] - 2017-03-31
 
-[1.0.0.rc1]: https://github.com/hanami/hanami-controller/compare/v1.0.0.beta3...v1.0.0.rc1
+[1.0.0.rc1]: https://github.com/hanami/hanami-action/compare/v1.0.0.beta3...v1.0.0.rc1
 
 ## [1.0.0.beta3] - 2017-03-17
 
@@ -578,7 +580,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - `Action#flash` is now public API. (Luca Guidi in #262)
 
-[1.0.0.beta3]: https://github.com/hanami/hanami-controller/compare/v1.0.0.beta2...v1.0.0.beta3
+[1.0.0.beta3]: https://github.com/hanami/hanami-action/compare/v1.0.0.beta2...v1.0.0.beta3
 
 ## [1.0.0.beta2] - 2017-03-02
 
@@ -593,7 +595,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Ensure to return 404 when `Action#send_file` cannot find a file with a globbed route. (Craig M. Wellington & Luca Guidi in #260)
 - Don't mutate Rack env when sending files. (Luca Guidi in #260)
 
-[1.0.0.beta2]: https://github.com/hanami/hanami-controller/compare/v1.0.0.beta1...v1.0.0.beta2
+[1.0.0.beta2]: https://github.com/hanami/hanami-action/compare/v1.0.0.beta1...v1.0.0.beta2
 
 ## [1.0.0.beta1] - 2017-02-14
 
@@ -611,7 +613,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Ensure `Flash` to return only fresh data. (Matias H. Leidemer & Luca Guidi in #jardakotesovec)
 - Ensure `session` keys to be accessed as symbols in action unit tests. (Luca Guidi in #237)
 
-[1.0.0.beta1]: https://github.com/hanami/hanami-controller/compare/v0.8.1...v1.0.0.beta1
+[1.0.0.beta1]: https://github.com/hanami/hanami-action/compare/v0.8.1...v1.0.0.beta1
 
 ## [0.8.1] - 2016-12-19
 
@@ -623,7 +625,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Don't pollute Rack env's `rack.exception` key if an exception is handled. (Thorbjørn Hermansen in #234)
 
-[0.8.1]: https://github.com/hanami/hanami-controller/compare/v0.8.0...v0.8.1
+[0.8.1]: https://github.com/hanami/hanami-action/compare/v0.8.0...v0.8.1
 
 ## [0.8.0] - 2016-11-15
 
@@ -640,7 +642,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Respect custom formats when referenced by HTTP `Accept`. (Russell Cloak in #221)
 - Don't symbolize raw params. (Kyle Chong in #224)
 
-[0.8.0]: https://github.com/hanami/hanami-controller/compare/v0.7.1...v0.8.0
+[0.8.0]: https://github.com/hanami/hanami-action/compare/v0.7.1...v0.8.0
 
 ## [0.7.1] - 2016-10-06
 
@@ -659,7 +661,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Don't stringify uploaded files. (Kyle Chong in #213)
 - Don't stringify params values when not necessary. (Kyle Chong in #214)
 
-[0.7.1]: https://github.com/hanami/hanami-controller/compare/v0.7.0...v0.7.1
+[0.7.1]: https://github.com/hanami/hanami-action/compare/v0.7.0...v0.7.1
 
 ## [0.7.0] - 2016-07-22
 
@@ -683,7 +685,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Params are deeply symbolized. (Luca Guidi in #verbman)
 - Send only changed cookies in HTTP response. (Artem Nistratov in #153)
 
-[0.7.0]: https://github.com/hanami/hanami-controller/compare/v0.6.1...v0.7.0
+[0.7.0]: https://github.com/hanami/hanami-action/compare/v0.6.1...v0.7.0
 
 ## [0.6.1] - 2016-02-05
 
@@ -691,7 +693,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Optimise memory usage by freezing MIME types constant. (Anatolii Didukh in #152)
 
-[0.6.1]: https://github.com/hanami/hanami-controller/compare/v0.6.0...v0.6.1
+[0.6.1]: https://github.com/hanami/hanami-action/compare/v0.6.0...v0.6.1
 
 ## [0.6.0] - 2016-01-22
 
@@ -699,7 +701,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Renamed the project. (Luca Guidi)
 
-[0.6.0]: https://github.com/hanami/hanami-controller/compare/v0.5.1...v0.6.0
+[0.6.0]: https://github.com/hanami/hanami-action/compare/v0.5.1...v0.6.0
 
 ## [0.5.1] - 2016-01-19
 
@@ -707,7 +709,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Ensure `rack.session` cookie to not be sent twice when both `Lotus::Action::Cookies` and `Rack::Session::Cookie` are used together. (Alfonso Uceda in #148)
 
-[0.5.1]: https://github.com/hanami/hanami-controller/compare/v0.5.0...v0.5.1
+[0.5.1]: https://github.com/hanami/hanami-action/compare/v0.5.0...v0.5.1
 
 ## [0.5.0] - 2016-01-12
 
@@ -726,7 +728,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Ensure superclass exceptions to not shadow subclasses during exception handling (eg. `CustomError` handler will take precedence over `StandardError`). (Luca Guidi)
 - Ensure Rack environment to be always available for sessions unit tests. (Cainã Costa in #135)
 
-[0.5.0]: https://github.com/hanami/hanami-controller/compare/v0.4.6...v0.5.0
+[0.5.0]: https://github.com/hanami/hanami-action/compare/v0.4.6...v0.5.0
 
 ## [0.4.6] - 2015-12-04
 
@@ -734,7 +736,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Allow to force custom headers for responses that according to RFC shouldn't include them (eg 204). Override `#keep_response_header?(header)` in action. (Luca Guidi in #124)
 
-[0.4.6]: https://github.com/hanami/hanami-controller/compare/v0.4.5...v0.4.6
+[0.4.6]: https://github.com/hanami/hanami-action/compare/v0.4.5...v0.4.6
 
 ## [0.4.5] - 2015-09-30
 
@@ -747,7 +749,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Deprecate `#default_format` in favor of: `#default_request_format`. (Theo Felippe in #122)
 
-[0.4.5]: https://github.com/hanami/hanami-controller/compare/v0.4.4...v0.4.5
+[0.4.5]: https://github.com/hanami/hanami-action/compare/v0.4.4...v0.4.5
 
 ## [0.4.4] - 2015-06-23
 
@@ -759,7 +761,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Ensure nested params to be correctly coerced to Hash. (Matthew Bellantoni in #107)
 
-[0.4.4]: https://github.com/hanami/hanami-controller/compare/v0.4.3...v0.4.4
+[0.4.4]: https://github.com/hanami/hanami-action/compare/v0.4.3...v0.4.4
 
 ## [0.4.3] - 2015-05-22
 
@@ -768,7 +770,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Introduced `Lotus::Action#send_file`. (Alfonso Uceda Pompa in #105)
 - Set automatically `Expires` option for cookies when it's missing but `Max-Age` is present. Compatibility with old browsers. (Alfonso Uceda Pompa in #102)
 
-[0.4.3]: https://github.com/hanami/hanami-controller/compare/v0.4.2...v0.4.3
+[0.4.3]: https://github.com/hanami/hanami-action/compare/v0.4.2...v0.4.3
 
 ## [0.4.2] - 2015-05-15
 
@@ -776,7 +778,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Ensure `Lotus::Action::Params#to_h` to return `::Hash` at the top level. (Luca Guidi in #101)
 
-[0.4.2]: https://github.com/hanami/hanami-controller/compare/v0.4.1...v0.4.2
+[0.4.2]: https://github.com/hanami/hanami-action/compare/v0.4.1...v0.4.2
 
 ## [0.4.1] - 2015-05-15
 
@@ -790,7 +792,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Ensure proper automatic `Content-Type` working well with Internet Explorer. (Luca Guidi in #94)
 - Ensure `Lotus::Action#redirect_to` to return `::String` for Rack servers compatibility. (Luca Guidi in #95)
 
-[0.4.1]: https://github.com/hanami/hanami-controller/compare/v0.4.0...v0.4.1
+[0.4.1]: https://github.com/hanami/hanami-action/compare/v0.4.0...v0.4.1
 
 ## [0.4.0] - 2015-03-23
 
@@ -805,7 +807,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - `redirect_to` now is a flow control method: it terminates the execution of an action, including the callbacks. (Alfonso Uceda Pompa in #73)
 
-[0.4.0]: https://github.com/hanami/hanami-controller/compare/v0.3.2...v0.4.0
+[0.4.0]: https://github.com/hanami/hanami-action/compare/v0.3.2...v0.4.0
 
 ## [0.3.2] - 2015-01-30
 
@@ -824,7 +826,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Only dump exceptions in `rack.errors` if handling is turned off, or the raised exception is not managed. (Luca Guidi in #58)
 - Ensure params will return coerced values. (Luca Guidi in #58)
 
-[0.3.2]: https://github.com/hanami/hanami-controller/compare/v0.3.1...v0.3.2
+[0.3.2]: https://github.com/hanami/hanami-action/compare/v0.3.1...v0.3.2
 
 ## [0.3.1] - 2015-01-08
 
@@ -836,7 +838,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Ensure params to return coerced values. (Steve Hodgkiss in #54)
 
-[0.3.1]: https://github.com/hanami/hanami-controller/compare/v0.3.0...v0.3.1
+[0.3.1]: https://github.com/hanami/hanami-action/compare/v0.3.0...v0.3.1
 
 ## [0.3.0] - 2014-12-23
 
@@ -869,7 +871,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Don't let exposures definition to override existing methods. (Luca Guidi in #40)
 
-[0.3.0]: https://github.com/hanami/hanami-controller/compare/v0.2.0...v0.3.0
+[0.3.0]: https://github.com/hanami/hanami-action/compare/v0.2.0...v0.3.0
 
 ## [0.2.0] - 2014-06-23
 
@@ -895,7 +897,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Reference exception in `rack.errors`. (Krzysztof Zalewski in #26)
 
-[0.2.0]: https://github.com/hanami/hanami-controller/compare/v0.1.0...v0.2.0
+[0.2.0]: https://github.com/hanami/hanami-action/compare/v0.1.0...v0.2.0
 
 ## [0.1.0] - 2014-02-23
 
@@ -915,4 +917,4 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Introduced basic actions compatible with Rack. (Luca Guidi)
 - Official support for Ruby 2.0. (Luca Guidi)
 
-[0.1.0]: https://github.com/hanami/hanami-controller/releases/tag/v0.1.0
+[0.1.0]: https://github.com/hanami/hanami-action/releases/tag/v0.1.0
