@@ -2,8 +2,6 @@
 
 require "hanami/action"
 
-# TODO: add deprecation notice for this file
-
 # Hanami
 #
 # @since 0.1.0
@@ -17,3 +15,9 @@ module Hanami
   module Controller
   end
 end
+
+warn(
+  "`require \"hanami/controller\"` is deprecated and will be removed in Hanami 3.1. " \
+  "Use `require \"hanami/action\"` instead.",
+  category: :deprecated
+)
