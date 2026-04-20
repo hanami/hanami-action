@@ -11,6 +11,8 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Changed
 
+- Renamed gem from hanami-controller to hanami-action. You should now `require "hanami-action"` or `require "hanami/action"`. (@timriley in #507)
+
 ### Deprecated
 
 ### Removed
