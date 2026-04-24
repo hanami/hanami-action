@@ -1906,7 +1906,8 @@ module Inheritance
   class Application
     def initialize
       @routes = Hanami::Router.new do
-        resources :books, only: %i[show destroy]
+        get "/books/:id", to: Inheritance::Controllers::Books::Show.new
+        delete "/books/:id", to: Inheritance::Controllers::Books::Destroy.new
       end
     end
 

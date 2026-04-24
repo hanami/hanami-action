@@ -8,10 +8,6 @@ RSpec.describe Hanami::Action do
 
     let(:app) { Inheritance::Application.new }
 
-    before do
-      pending
-    end
-
     it "calls the exact chain of events" do
       get "/books/23"
 
