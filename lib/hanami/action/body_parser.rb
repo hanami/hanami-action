@@ -64,7 +64,7 @@ module Hanami
 
           # Set Hanami Router keys for backward compatibility.
           env[ROUTER_PARSED_BODY] = parsed
-          env[ROUTER_PARAMS] = symbolized
+          env[ROUTER_PARAMS] = env.fetch(ROUTER_PARAMS, {}).merge(symbolized)
         end
 
         # rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity

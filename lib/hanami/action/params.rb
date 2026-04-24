@@ -370,7 +370,7 @@ module Hanami
       # @since 0.7.0
       # @api private
       def _parsed_body_params(fallback = {})
-        env.fetch(ACTION_BODY_PARAMS) { env.fetch(ROUTER_PARAMS, fallback) }
+        env.fetch(ROUTER_PARAMS) { env.fetch(ACTION_BODY_PARAMS, fallback) }
       end
     end
   end
