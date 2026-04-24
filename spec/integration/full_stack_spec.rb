@@ -1,23 +1,72 @@
 # frozen_string_literal: true
 
+require "json"
 require "rack/test"
 
 module FullStack
+  class Action < Hanami::Action
+    include Hanami::Action::Session
+
+    after do |req, res|
+      res[:params] = req.params.to_h
+      req.env["hanami.response"] = res
+    end
+  end
+
+  class ResponseSerializer
+    def render(env, response)
+      action   = env.delete(Hanami::Action::ACTION_INSTANCE)
+      response = env.delete("hanami.response") || response
+
+      handle_hanami_response(env, action, response) ||
+        handle_rack_response(env, action, response)
+
+      response
+    end
+
+    private
+
+    def handle_hanami_response(env, action, response)
+      return unless response.respond_to?(:status)
+
+      if response.status == 200 && !head_request?(env)
+        response.body = JSON.generate(
+          action: action.class.name,
+          exposures: response.exposures.reject { |key, _| key == :params || key == :format },
+          params: response[:params].to_h,
+          flash_now: response.flash.now,
+          flash_next: response.flash.next
+        )
+      end
+
+      true
+    end
+
+    def handle_rack_response(env, action, response)
+      if response[0] == 200 && !head_request?(env)
+        response[2] = JSON.generate(
+          action: action.class.name,
+          params: env["router.params"].to_h,
+          flash_now: env["rack.session"].fetch(Hanami::Action::Flash::KEY, nil),
+          flash_next: nil
+        )
+      end
+    end
+
+    def head_request?(env)
+      env[Hanami::Action::REQUEST_METHOD] == Hanami::Action::HEAD
+    end
+  end
+
   module Actions
     module Home
-      class Index < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Index < Action
         def handle(*, res)
           res[:greeting] = "Hello"
         end
       end
 
-      class Head < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Head < Action
         def handle(*, res)
           res.body = "foo"
         end
@@ -25,18 +74,12 @@ module FullStack
     end
 
     module Books
-      class Index < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Index < Action
         def handle(*)
         end
       end
 
-      class Create < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Create < Action
         params do
           required(:title).filled(:str?)
         end
@@ -47,10 +90,7 @@ module FullStack
         end
       end
 
-      class Update < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Update < Action
         params do
           required(:id).value(:integer)
 
@@ -77,18 +117,12 @@ module FullStack
     end
 
     module Settings
-      class Index < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Index < Action
         def handle(*)
         end
       end
 
-      class Create < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Create < Action
         def handle(*, res)
           res.flash[:message] = "Saved!"
           res.redirect_to "/settings"
@@ -97,19 +131,13 @@ module FullStack
     end
 
     module Poll
-      class Start < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Start < Action
         def handle(*, res)
           res.redirect_to "/poll/1"
         end
       end
 
-      class Step1 < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Step1 < Action
         def handle(req, res)
           if req.env["REQUEST_METHOD"] == "GET"
             res.flash[:notice] = "Start the poll"
@@ -120,10 +148,7 @@ module FullStack
         end
       end
 
-      class Step2 < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Step2 < Action
         def handle(req, res)
           if req.env["REQUEST_METHOD"] == "POST"
             res.flash[:notice] = "Poll completed"
@@ -134,10 +159,7 @@ module FullStack
     end
 
     module Users
-      class Show < Hanami::Action
-        include Hanami::Action::Session
-        include Inspector
-
+      class Show < Action
         before :redirect_to_root
         after :set_body
 
@@ -182,15 +204,15 @@ module FullStack
         get "/users/1", to: FullStack::Actions::Users::Show.new
       end
 
-      @renderer = Renderer.new
-      @app      = Rack::Builder.new do
+      @response_serializer = FullStack::ResponseSerializer.new
+      @app                 = Rack::Builder.new do
         use Rack::Session::Cookie, secret: SecureRandom.hex(64)
         run routes
       end.to_app
     end
 
     def call(env)
-      @renderer.render(env, @app.call(env))
+      @response_serializer.render(env, @app.call(env))
     end
   end
 end

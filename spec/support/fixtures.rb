@@ -6,7 +6,6 @@ require "hanami/router"
 require "hanami/middleware/body_parser"
 require "hanami/view/html"
 require "rack/session/cookie"
-require_relative "renderer"
 
 HTTP_TEST_STATUSES = {
   100 => "Continue",
@@ -1314,7 +1313,6 @@ module SessionWithCookies
         get "/", to: SessionWithCookies::Actions::Home::Index.new
       end
 
-      @renderer = Renderer.new
       @app = Rack::Builder.new do
         use Rack::Lint
         use Rack::Session::Cookie, secret: SecureRandom.hex(64)
@@ -1323,7 +1321,7 @@ module SessionWithCookies
     end
 
     def call(env)
-      @renderer.render(env, @app.call(env))
+      @app.call(env)
     end
   end
 end
@@ -1333,7 +1331,6 @@ module SessionsWithoutCookies
     module Home
       class Index < Hanami::Action
         include Hanami::Action::Session
-        include Inspector
 
         def handle(*)
         end
@@ -1347,15 +1344,14 @@ module SessionsWithoutCookies
         get "/", to: SessionsWithoutCookies::Actions::Home::Index.new
       end
 
-      @renderer = Renderer.new
-      @app      = Rack::Builder.new do
+      @app = Rack::Builder.new do
         use Rack::Session::Cookie, secret: SecureRandom.hex(64)
         run routes
       end.to_app
     end
 
     def call(env)
-      @renderer.render(env, @app.call(env))
+      @app.call(env)
     end
   end
 end
