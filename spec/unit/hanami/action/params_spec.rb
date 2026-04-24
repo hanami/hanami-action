@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "rack"
+require "json"
 
 RSpec.describe Hanami::Action::Params do
   describe "#raw" do
@@ -561,6 +562,78 @@ RSpec.describe Hanami::Action::Params do
           ArgumentError,
           %(Can't add :book, :code, "is invalid" to {book: ["is missing"]})
         )
+      end
+    end
+  end
+
+  describe "JSON body with route params" do
+    subject(:action) do
+      Class.new(Hanami::Action) do
+        config.formats.accept :json
+
+        def handle(req, res)
+          res.body = req.params.to_h.inspect
+        end
+      end.new
+    end
+
+    # Simulates the action parsing the JSON body itself (standalone use, no router body parsing).
+    def action_parsed_env(route_params:, body:)
+      Rack::MockRequest.env_for(
+        "/",
+        method: "POST",
+        input: JSON.generate(body),
+        "CONTENT_TYPE" => "application/json",
+        "router.params" => route_params,
+      )
+    end
+
+    # Simulates what hanami-router does: parse the JSON body and merge everything
+    # into router.params before handing off to the action.
+    def router_parsed_env(route_params:, body:)
+      raw_json = JSON.generate(body)
+      parsed = JSON.parse(raw_json)
+      symbolized = JSON.parse(raw_json, symbolize_names: true)
+
+      Rack::MockRequest.env_for(
+        "/",
+        method: "POST",
+        input: raw_json,
+        "CONTENT_TYPE" => "application/json",
+        "router.params" => route_params.merge(symbolized),
+        "router.parsed_body" => parsed,
+      )
+    end
+
+    context "when the action parses the JSON body (standalone, no router body parsing)" do
+      it "includes route params alongside JSON body params" do
+        env = action_parsed_env(route_params: {slug: "my-article"}, body: {comment: {body: "hello"}})
+        response = action.call(env)
+
+        expect(response[:params][:slug]).to eq("my-article")
+        expect(response[:params][:comment]).to eq({body: "hello"})
+      end
+
+      it "includes route params when there is no body" do
+        env = Rack::MockRequest.env_for(
+          "/",
+          method: "POST",
+          "CONTENT_TYPE" => "application/json",
+          "router.params" => {slug: "my-article"},
+        )
+        response = action.call(env)
+
+        expect(response[:params][:slug]).to eq("my-article")
+      end
+    end
+
+    context "when the router pre-parses the JSON body" do
+      it "includes route params alongside JSON body params" do
+        env = router_parsed_env(route_params: {slug: "my-article"}, body: {comment: {body: "hello"}})
+        response = action.call(env)
+
+        expect(response[:params][:slug]).to eq("my-article")
+        expect(response[:params][:comment]).to eq({body: "hello"})
       end
     end
   end
