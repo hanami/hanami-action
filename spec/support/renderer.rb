@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "json"
+
 module Inspector
   def self.included(action)
     action.class_eval do
@@ -13,7 +15,7 @@ end
 
 class Renderer
   def render(env, response)
-    action   = env.delete("hanami.action")
+    action   = env.delete(Hanami::Action::ACTION_INSTANCE)
     response = env.delete("hanami.response") || response
 
     handle_hanami_response(env, action, response) ||
@@ -28,9 +30,13 @@ class Renderer
     return unless response.respond_to?(:status)
 
     if response.status == 200 && !head_request?(env)
-      response.body = <<~STR
-        #{action.class.name} #{response.exposures} params: #{response[:params].to_h} flash: #{response.session[:_flash].inspect}
-      STR
+      response.body = JSON.generate(
+        action: action.class.name,
+        exposures: response.exposures.reject { |key, _| key == :params || key == :format },
+        params: response[:params].to_h,
+        flash_now: response.flash.now,
+        flash_next: response.flash.next
+      )
     end
 
     true
@@ -38,9 +44,12 @@ class Renderer
 
   def handle_rack_response(env, action, response)
     if response[0] == 200 && !head_request?(env)
-      response[2] =
-        "#{action.class.name} params: #{env['router.params'].to_h} flash: #{env['rack.session'].fetch('flash',
-                                                                                                      nil).inspect}"
+      response[2] = JSON.generate(
+        action: action.class.name,
+        params: env["router.params"].to_h,
+        flash_now: env["rack.session"].fetch(Hanami::Action::Flash::KEY, nil),
+        flash_next: nil
+      )
     end
   end
 

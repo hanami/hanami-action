@@ -202,15 +202,20 @@ RSpec.describe "Full stack application" do
     FullStack::Application.new
   end
 
+  def parsed_body
+    JSON.parse(last_response.body, symbolize_names: true)
+  end
+
   it "passes action inside the Rack env" do
     get "/", {}, "HTTP_ACCEPT" => "text/html"
 
-    expect(last_response.body).to include("FullStack::Actions::Home::Index")
-    if RUBY_VERSION >= "4"
-      expect(last_response.body).to include('greeting: "Hello"')
-    else
-      expect(last_response.body).to include(':greeting=>"Hello"')
-    end
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Home::Index",
+      exposures: {greeting: "Hello"},
+      params: {},
+      flash_now: {},
+      flash_next: {}
+    )
   end
 
   it "only allows entity headers if the request is HEAD" do
@@ -224,56 +229,114 @@ RSpec.describe "Full stack application" do
     post "/books", title: ""
     follow_redirect!
 
-    expect(last_response.body).to include("FullStack::Actions::Books::Index")
-    expect(last_response.body).to include("params: {}")
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Books::Index",
+      exposures: {},
+      params: {},
+      flash_now: {},
+      flash_next: {}
+    )
 
     get "/books"
-    expect(last_response.body).to include("params: {}")
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Books::Index",
+      exposures: {},
+      params: {},
+      flash_now: {},
+      flash_next: {}
+    )
   end
 
   it "uses flash to pass informations" do
     get "/poll"
     follow_redirect!
 
-    expect(last_response.body).to include("FullStack::Actions::Poll::Step1")
-    expect(last_response.body).to include("Start the poll")
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Poll::Step1",
+      exposures: {},
+      params: {},
+      flash_now: {},
+      flash_next: {notice: "Start the poll"}
+    )
 
     post "/poll/1", {}
     follow_redirect!
 
-    expect(last_response.body).to include("FullStack::Actions::Poll::Step2")
-    expect(last_response.body).to include("Step 1 completed")
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Poll::Step2",
+      exposures: {},
+      params: {},
+      flash_now: {notice: "Step 1 completed"},
+      flash_next: {}
+    )
+  end
+
+  it "exposes flash queued for the next request" do
+    get "/poll/1"
+
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Poll::Step1",
+      exposures: {},
+      params: {},
+      flash_now: {},
+      flash_next: {notice: "Start the poll"}
+    )
   end
 
   it "completes the poll flow on the second step" do
     post "/poll/2", {}
     follow_redirect!
 
-    expect(last_response.body).to include("FullStack::Controllers::Home::Index")
-    expect(last_response.body).to include("Poll completed")
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Home::Index",
+      exposures: {greeting: "Hello"},
+      params: {},
+      flash_now: {notice: "Poll completed"},
+      flash_next: {}
+    )
   end
 
   it "doesn't return stale informations when using redirect" do
     post "/settings", {}
     follow_redirect!
 
-    expect(last_response.body).to include("flash: nil")
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Settings::Index",
+      exposures: {},
+      params: {},
+      flash_now: {message: "Saved!"},
+      flash_next: {}
+    )
 
     get "/settings"
 
-    expect(last_response.body).to include("flash: nil")
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Settings::Index",
+      exposures: {},
+      params: {},
+      flash_now: {},
+      flash_next: {}
+    )
   end
 
   it "doesn't return stale informations when not using redirect" do
     get "/poll/1"
-    if RUBY_VERSION >= "4"
-      expect(last_response.body).to include('flash: {notice: "Start the poll"}')
-    else
-      expect(last_response.body).to include('flash: {:notice=>"Start the poll"}')
-    end
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Poll::Step1",
+      exposures: {},
+      params: {},
+      flash_now: {},
+      flash_next: {notice: "Start the poll"}
+    )
 
     get "/settings"
-    expect(last_response.body).to include("flash: nil")
+    expect(parsed_body).to eq(
+      action: "FullStack::Actions::Settings::Index",
+      exposures: {},
+      params: {},
+      flash_now: {notice: "Start the poll"},
+      flash_next: {}
+    )
   end
 
   it "can access params with string symbols or methods" do
