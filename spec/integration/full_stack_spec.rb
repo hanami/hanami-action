@@ -245,6 +245,14 @@ RSpec.describe "Full stack application" do
     expect(last_response.body).to include("Step 1 completed")
   end
 
+  it "completes the poll flow on the second step" do
+    post "/poll/2", {}
+    follow_redirect!
+
+    expect(last_response.body).to include("FullStack::Controllers::Home::Index")
+    expect(last_response.body).to include("Poll completed")
+  end
+
   it "doesn't return stale informations when using redirect" do
     post "/settings", {}
     follow_redirect!
