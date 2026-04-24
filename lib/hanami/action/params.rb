@@ -345,12 +345,11 @@ module Hanami
 
       # @since 0.7.0
       # @api private
-      def _extract_params # rubocop:disable Metrics/AbcSize
+      def _extract_params
         result = {}
 
         unless env.key?(RACK_INPUT)
           result.merge! _parsed_body_params(env)
-          env[Action::REQUEST_METHOD] ||= Action::DEFAULT_REQUEST_METHOD
           return result
         end
 

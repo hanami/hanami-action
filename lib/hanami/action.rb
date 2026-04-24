@@ -320,6 +320,11 @@ module Hanami
           env: body_parse_error ? {} : env,
           contract: contract
         )
+
+        # Ensure env has REQUEST_METHOD for downstream code (e.g. Response) when actions are called
+        # with a direct params hash as a testing convenience.
+        env[REQUEST_METHOD] ||= DEFAULT_REQUEST_METHOD
+
         request = build_request(
           env: env,
           params: params,
