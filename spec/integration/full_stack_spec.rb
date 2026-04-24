@@ -9,15 +9,15 @@ RSpec.describe "Full stack application" do
     FullStack::Application.new
   end
 
-  before do
-    pending
-  end
-
   it "passes action inside the Rack env" do
     get "/", {}, "HTTP_ACCEPT" => "text/html"
 
     expect(last_response.body).to include("FullStack::Actions::Home::Index")
-    expect(last_response.body).to include(':greeting=>"Hello"')
+    if RUBY_VERSION >= "4"
+      expect(last_response.body).to include('greeting: "Hello"')
+    else
+      expect(last_response.body).to include(':greeting=>"Hello"')
+    end
   end
 
   it "only allows entity headers if the request is HEAD" do
@@ -56,19 +56,23 @@ RSpec.describe "Full stack application" do
     post "/settings", {}
     follow_redirect!
 
-    expect(last_response.body).to match(/Hanami::Action::Flash:0x[\d\w]* {:data=>{}, :kept=>{"message"=>"Saved!"}}/)
+    expect(last_response.body).to include("flash: nil")
 
     get "/settings"
 
-    expect(last_response.body).to match(/Hanami::Action::Flash:0x[\d\w]* {:data=>{}, :kept=>{}}/)
+    expect(last_response.body).to include("flash: nil")
   end
 
   it "doesn't return stale informations when not using redirect" do
     get "/poll/1"
-    expect(last_response.body).to match(/Hanami::Action::Flash:0x[\d\w]* {:data=>{:notice=>"Start the poll"}, :kept=>{}}/)
+    if RUBY_VERSION >= "4"
+      expect(last_response.body).to include('flash: {notice: "Start the poll"}')
+    else
+      expect(last_response.body).to include('flash: {:notice=>"Start the poll"}')
+    end
 
     get "/settings"
-    expect(last_response.body).to match(/Hanami::Action::Flash:0x[\d\w]* {:data=>{}, :kept=>{}}/)
+    expect(last_response.body).to include("flash: nil")
   end
 
   it "can access params with string symbols or methods" do

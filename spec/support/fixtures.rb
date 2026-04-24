@@ -1416,23 +1416,20 @@ module FullStack
       routes = Hanami::Router.new do
         get "/",     to: FullStack::Actions::Home::Index.new
         get "/head", to: FullStack::Actions::Home::Head.new
-        resources :books, only: %i[index create update]
+        get   "/books",     to: FullStack::Actions::Books::Index.new
+        post  "/books",     to: FullStack::Actions::Books::Create.new
+        patch "/books/:id", to: FullStack::Actions::Books::Update.new
 
         get  "/settings", to: FullStack::Actions::Settings::Index.new
         post "/settings", to: FullStack::Actions::Settings::Create.new
 
-        get "/poll", to: FullStack::Actions::Poll::Start.new
+        get  "/poll",   to: FullStack::Actions::Poll::Start.new
+        get  "/poll/1", to: FullStack::Actions::Poll::Step1.new
+        post "/poll/1", to: FullStack::Actions::Poll::Step1.new
+        get  "/poll/2", to: FullStack::Actions::Poll::Step2.new
+        post "/poll/2", to: FullStack::Actions::Poll::Step2.new
 
-        prefix "poll" do
-          get  "/1", to: FullStack::Actions::Poll::Step1.new
-          post "/1", to: FullStack::Actions::Poll::Step1.new
-          get  "/2", to: FullStack::Actions::Poll::Step2.new
-          post "/2", to: FullStack::Actions::Poll::Step2.new
-        end
-
-        prefix "users" do
-          get "/1", to: FullStack::Actions::Users::Show.new
-        end
+        get "/users/1", to: FullStack::Actions::Users::Show.new
       end
 
       @renderer = Renderer.new
