@@ -124,17 +124,6 @@ class ErrorCallWithStringClassName < Hanami::Action
   end
 end
 
-class ErrorCallWithMultipleStringClassNames < Hanami::Action
-  config.handle_exception(
-    "RuntimeError" => 500,
-    "StandardError" => 501
-  )
-
-  def handle(_req, _res)
-    raise StandardError
-  end
-end
-
 class MyCustomError < StandardError; end
 
 class ErrorCallFromInheritedErrorClass < Hanami::Action
@@ -262,46 +251,6 @@ class BeforeMethodAction < Hanami::Action
   end
 end
 
-class SubclassBeforeMethodAction < BeforeMethodAction
-  before :upcase_article
-
-  private
-
-  def upcase_article
-    @article.upcase!
-  end
-end
-
-class ParamsBeforeMethodAction < BeforeMethodAction
-  private
-
-  def upcase_article
-  end
-
-  def set_article(req, res)
-    res[:exposed_params] = req.params
-    res[:article] = super + req.params[:bang]
-  end
-end
-
-class ErrorBeforeMethodAction < BeforeMethodAction
-  private
-
-  def set_article
-    raise
-  end
-end
-
-class HandledErrorBeforeMethodAction < BeforeMethodAction
-  config.handle_exception RecordNotFound => 404
-
-  private
-
-  def set_article
-    raise RecordNotFound.new
-  end
-end
-
 class BeforeBlockAction < Hanami::Action
   before { |_, res|   res[:article] = "Good morning!" }
   before { |_, res|   res[:article] = res[:article].reverse }
@@ -309,10 +258,6 @@ class BeforeBlockAction < Hanami::Action
 
   def handle(req, res)
   end
-end
-
-class YieldBeforeBlockAction < BeforeBlockAction
-  before { |req, res| res[:yielded_params] = req.params }
 end
 
 class AfterMethodAction < Hanami::Action
@@ -362,13 +307,6 @@ class AfterBlockAction < Hanami::Action
   end
 end
 
-class YieldAfterBlockAction < AfterBlockAction
-  after { |req, res| res[:meaning_of_life_params] = req.params }
-
-  def handle(*)
-  end
-end
-
 class MissingRequestSessionAction < Hanami::Action
   def handle(req, _)
     req.session[:user_id]
@@ -391,14 +329,6 @@ class SessionAction < Hanami::Action
   include Hanami::Action::Session
 
   def handle(req, res)
-  end
-end
-
-class FlashAction < Hanami::Action
-  include Hanami::Action::Session
-
-  def handle(*, res)
-    res.flash[:error] = "ouch"
   end
 end
 
@@ -662,16 +592,6 @@ class AllowlistedUploadDslAction < Hanami::Action
 
   def handle(req, res)
     res.body = req.params.to_h.inspect
-  end
-end
-
-class ParamsValidationAction < Hanami::Action
-  params do
-    required(:email).filled(:str?)
-  end
-
-  def handle(req, *)
-    halt 400 unless req.params.valid?
   end
 end
 
@@ -1724,46 +1644,6 @@ module RouterIntegration
         use Hanami::Middleware::BodyParser, :json
         run routes
       end.to_app
-    end
-
-    def call(env)
-      @app.call(env)
-    end
-  end
-end
-
-module SessionIntegration
-  class Application
-    def initialize
-      resolver = EndpointResolver.new
-
-      routes = Hanami::Router.new(resolver: resolver) do
-        get    "/",       to: Dashboard::Index.new
-        post   "/login",  to: Session::Create.new
-        delete "/logout", to: Sessions::Destroy.new
-      end
-
-      @app = Rack::Builder.new do
-        use Rack::Lint
-        use Rack::Session::Cookie, secret: SecureRandom.hex(64)
-        run routes
-      end.to_app
-    end
-
-    def call(env)
-      @app.call(env)
-    end
-  end
-end
-
-module StandaloneSessionIntegration
-  class Application
-    def initialize
-      @app = Rack::Builder.new do
-        use Rack::Lint
-        use Rack::Session::Cookie, secret: SecureRandom.hex(64)
-        run StandaloneSession.new
-      end
     end
 
     def call(env)
