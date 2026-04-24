@@ -2,6 +2,199 @@
 
 require "rack/test"
 
+module FullStack
+  module Actions
+    module Home
+      class Index < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        def handle(*, res)
+          res[:greeting] = "Hello"
+        end
+      end
+
+      class Head < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        def handle(*, res)
+          res.body = "foo"
+        end
+      end
+    end
+
+    module Books
+      class Index < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        def handle(*)
+        end
+      end
+
+      class Create < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        params do
+          required(:title).filled(:str?)
+        end
+
+        def handle(req, res)
+          req.params.valid?
+          res.redirect_to "/books"
+        end
+      end
+
+      class Update < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        params do
+          required(:id).value(:integer)
+
+          required(:book).schema do
+            required(:title).filled(:str?)
+            required(:author).schema do
+              required(:name).filled(:str?)
+              required(:favourite_colour)
+            end
+          end
+        end
+
+        def handle(req, res)
+          valid = req.params.valid?
+
+          res.status = 201
+          res.body = JSON.generate(
+            symbol_access: req.params[:book][:author] && req.params[:book][:author][:name],
+            valid: valid,
+            errors: req.params.errors.to_h
+          )
+        end
+      end
+    end
+
+    module Settings
+      class Index < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        def handle(*)
+        end
+      end
+
+      class Create < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        def handle(*, res)
+          res.flash[:message] = "Saved!"
+          res.redirect_to "/settings"
+        end
+      end
+    end
+
+    module Poll
+      class Start < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        def handle(*, res)
+          res.redirect_to "/poll/1"
+        end
+      end
+
+      class Step1 < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        def handle(req, res)
+          if req.env["REQUEST_METHOD"] == "GET"
+            res.flash[:notice] = "Start the poll"
+          else
+            res.flash[:notice] = "Step 1 completed"
+            res.redirect_to "/poll/2"
+          end
+        end
+      end
+
+      class Step2 < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        def handle(req, res)
+          if req.env["REQUEST_METHOD"] == "POST"
+            res.flash[:notice] = "Poll completed"
+            res.redirect_to "/"
+          end
+        end
+      end
+    end
+
+    module Users
+      class Show < Hanami::Action
+        include Hanami::Action::Session
+        include Inspector
+
+        before :redirect_to_root
+        after :set_body
+
+        def handle(*, res)
+          res.body = "call method shouldn't be called"
+        end
+
+        private
+
+        def redirect_to_root(*, res)
+          res.redirect_to "/"
+        end
+
+        def set_body
+          res.body = "after callback shouldn't be called"
+        end
+      end
+    end
+  end
+
+  class Application
+    def initialize # rubocop:disable Metrics/AbcSize
+      routes = Hanami::Router.new do
+        get "/",     to: FullStack::Actions::Home::Index.new
+        get "/head", to: FullStack::Actions::Home::Head.new
+        get   "/books",     to: FullStack::Actions::Books::Index.new
+        post  "/books",     to: FullStack::Actions::Books::Create.new
+        patch "/books/:id", to: FullStack::Actions::Books::Update.new
+
+        get  "/settings", to: FullStack::Actions::Settings::Index.new
+        post "/settings", to: FullStack::Actions::Settings::Create.new
+
+        get "/poll", to: FullStack::Actions::Poll::Start.new
+
+        scope "poll" do
+          get  "/1", to: FullStack::Actions::Poll::Step1.new
+          post "/1", to: FullStack::Actions::Poll::Step1.new
+          get  "/2", to: FullStack::Actions::Poll::Step2.new
+          post "/2", to: FullStack::Actions::Poll::Step2.new
+        end
+
+        get "/users/1", to: FullStack::Actions::Users::Show.new
+      end
+
+      @renderer = Renderer.new
+      @app      = Rack::Builder.new do
+        use Rack::Session::Cookie, secret: SecureRandom.hex(64)
+        run routes
+      end.to_app
+    end
+
+    def call(env)
+      @renderer.render(env, @app.call(env))
+    end
+  end
+end
+
 RSpec.describe "Full stack application" do
   include Rack::Test::Methods
 
