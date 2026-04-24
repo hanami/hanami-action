@@ -16,14 +16,11 @@ module Hanami
     #
     # @see Hanami::Action::Request#params
 
-    # A set of params requested by the client
+    # A set of params requested by the client.
     #
-    # It's able to extract the relevant params from a Rack env of from an Hash.
-    #
-    # There are three scenarios:
-    #   * When used with Hanami::Router: it contains only the params from the request
-    #   * When used standalone: it contains all the Rack env
-    #   * Default: it returns the given hash as it is. It's useful for testing purposes.
+    # Extracts the relevant params from a Rack env (query string, request body, and route params
+    # placed in `env["router.params"]` by the router), or from a plain hash passed for convenience
+    # in tests.
     #
     # @since 0.1.0
     class Params
@@ -343,16 +340,13 @@ module Hanami
 
       private
 
-      # @since 0.7.0
-      # @api private
       def _extract_params # rubocop:disable Metrics/AbcSize
+        # Without PATH_INFO (URL path from a server) or rack.input (request body), env has no
+        # Rack-sourced data for us to parse as params; it's likely a bare hash passed to
+        # `Action#call` for convenience in tests. In this case, treat the env itself as the params.
+        return env unless env.key?("PATH_INFO") || env.key?(RACK_INPUT)
+
         result = {}
-
-        unless env.key?("PATH_INFO") || env.key?(RACK_INPUT)
-          result.merge! _parsed_body_params(env)
-          return result
-        end
-
         rack_request = ::Rack::Request.new(env)
 
         # Start with the query string params.
@@ -366,12 +360,6 @@ module Hanami
         result.merge!(env[ACTION_BODY_PARAMS]) if env.key?(ACTION_BODY_PARAMS)
 
         result
-      end
-
-      # @since 0.7.0
-      # @api private
-      def _parsed_body_params(fallback = {})
-        env.fetch(ROUTER_PARAMS) { env.fetch(ACTION_BODY_PARAMS, fallback) }
       end
     end
   end

@@ -95,19 +95,6 @@ RSpec.describe Hanami::Action::Params do
           end
         end
       end
-
-      context "with Hanami::Router" do
-        it "returns all the params as they are" do
-          # Hanami::Router params are always symbolized
-          response = action.call("router.params" => {id: "23"})
-
-          if RUBY_VERSION < "3.4"
-            expect(response.body).to eq([%({:id=>"23"})])
-          else
-            expect(response.body).to eq([%({id: "23"})])
-          end
-        end
-      end
     end
 
     context "when this feature is enabled" do
@@ -155,18 +142,6 @@ RSpec.describe Hanami::Action::Params do
             end
           end
         end
-
-        context "with Hanami::Router" do
-          it "returns only the listed params" do
-            response = action.call("router.params" => {id: 23, another: "x"})
-
-            if RUBY_VERSION < "3.4"
-              expect(response.body).to eq([%({:id=>23})])
-            else
-              expect(response.body).to eq([%({id: 23})])
-            end
-          end
-        end
       end
 
       context "with an anoymous class" do
@@ -197,18 +172,6 @@ RSpec.describe Hanami::Action::Params do
               expect(response.body).to match(%({:username=>"jodosha"}))
             else
               expect(response.body).to match(%({username: "jodosha"}))
-            end
-          end
-        end
-
-        context "with Hanami::Router" do
-          it "returns only the listed params" do
-            response = action.call("router.params" => {username: "jodosha", y: "x"})
-
-            if RUBY_VERSION < "3.4"
-              expect(response.body).to eq([%({:username=>"jodosha"})])
-            else
-              expect(response.body).to eq([%({username: "jodosha"})])
             end
           end
         end
