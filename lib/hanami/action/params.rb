@@ -345,10 +345,10 @@ module Hanami
 
       # @since 0.7.0
       # @api private
-      def _extract_params
+      def _extract_params # rubocop:disable Metrics/AbcSize
         result = {}
 
-        unless env.key?(RACK_INPUT)
+        unless env.key?("PATH_INFO") || env.key?(RACK_INPUT)
           result.merge! _parsed_body_params(env)
           return result
         end
@@ -358,8 +358,8 @@ module Hanami
         # Start with the query string params.
         result.merge!(rack_request.GET)
 
-        # Merge form-urlencoded body params if BodyParser hasn't already consumed the body.
-        result.merge!(rack_request.POST) unless env.key?(ACTION_BODY_PARAMS)
+        # Merge form-urlencoded body params if there's a body and BodyParser hasn't consumed it.
+        result.merge!(rack_request.POST) if env.key?(RACK_INPUT) && !env.key?(ACTION_BODY_PARAMS)
 
         # Merge route params, then finally the BodyParser-parsed body (which wins on collisions).
         result.merge!(env[ROUTER_PARAMS]) if env.key?(ROUTER_PARAMS)

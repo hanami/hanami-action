@@ -82,6 +82,18 @@ RSpec.describe Hanami::Action::Params do
             expect(response.body).to eq(%({id: "23", x: {foo: "bar"}}))
           end
         end
+
+        it "returns only query params for bodyless GET requests" do
+          # Rack 3 omits rack.input for bodyless requests; env keys like REQUEST_METHOD,
+          # SERVER_NAME, etc. must not leak into the params.
+          response = Rack::MockRequest.new(action).request("GET", "/foo?id=23")
+
+          if RUBY_VERSION < "3.4"
+            expect(response.body).to eq(%({:id=>"23"}))
+          else
+            expect(response.body).to eq(%({id: "23"}))
+          end
+        end
       end
 
       context "with Hanami::Router" do
