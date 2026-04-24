@@ -153,6 +153,21 @@ RSpec.describe Hanami::Action::BodyParser do
         expect(env["router.params"]).to eq(name: "Alice", age: 30)
       end
 
+      it "preserves existing route params when parsing JSON" do
+        config.formats.accept :json
+
+        env = {
+          "CONTENT_TYPE" => "application/json",
+          Rack::RACK_INPUT => StringIO.new('{"comment":{"body":"hello"}}'),
+          "router.params" => {slug: "my-article"}
+        }
+
+        described_class.parse(env, config)
+
+        expect(env["router.parsed_body"]).to eq("comment" => {"body" => "hello"})
+        expect(env["router.params"]).to eq(slug: "my-article", comment: {body: "hello"})
+      end
+
       it "parses application/vnd.api+json" do
         # Register JSON:API format with vnd.api+json content type
         config.formats.register(:jsonapi, "application/vnd.api+json",
@@ -253,6 +268,31 @@ RSpec.describe Hanami::Action::BodyParser do
 
         expect(env["router.parsed_body"]).to eq("title" => "My Title")
         expect(env["router.params"]).to eq(title: "My Title")
+      end
+
+      it "preserves existing route params when parsing multipart data" do
+        config.formats.accept :html
+
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body = [
+          "------WebKitFormBoundary7MA4YWxkTrZu0gW",
+          'Content-Disposition: form-data; name="title"',
+          "",
+          "My Title",
+          "------WebKitFormBoundary7MA4YWxkTrZu0gW--"
+        ].join("\r\n")
+
+        env = {
+          "CONTENT_TYPE" => "multipart/form-data; boundary=#{boundary}",
+          "CONTENT_LENGTH" => body.bytesize.to_s,
+          Rack::RACK_INPUT => StringIO.new(body),
+          "router.params" => {slug: "my-article"}
+        }
+
+        described_class.parse(env, config)
+
+        expect(env["router.parsed_body"]).to eq("title" => "My Title")
+        expect(env["router.params"]).to eq(slug: "my-article", title: "My Title")
       end
 
       it "does not parse when only JSON accepted" do
