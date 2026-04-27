@@ -203,8 +203,10 @@ module Hanami
         # important for the backwards compatibility behavior in `Validatable::ClassMethods#params`.
         contract ||= self.class._contract || DefaultContract
         validation = contract.call(raw)
+        validated = validation.to_h
+        path_only = _path_params.reject { |k, _| validated.key?(k) }
 
-        @params = validation.to_h
+        @params = validated.merge(path_only)
         @errors = Errors.new(validation.errors.to_h)
 
         freeze
@@ -371,6 +373,23 @@ module Hanami
       # @api private
       def _parsed_body_params(fallback = {})
         env.fetch(ROUTER_PARAMS) { env.fetch(ACTION_BODY_PARAMS, fallback) }
+      end
+
+      # @api private
+      def _path_params
+        return {} unless env.key?(ROUTER_PARAMS) && env.key?(RACK_INPUT)
+
+        router_params = Utils::Hash.deep_symbolize(env.fetch(ROUTER_PARAMS, {}))
+        body_params = Utils::Hash.deep_symbolize(
+          env.fetch(ACTION_BODY_PARAMS) {
+            env.fetch(ROUTER_PARSED_BODY) {
+              ::Rack::Request.new(env).POST
+            }
+          }
+        )
+        query_params = Utils::Hash.deep_symbolize(::Rack::Request.new(env).GET)
+
+        router_params.reject { |k, _| body_params.key?(k) || query_params.key?(k) }
       end
     end
   end
