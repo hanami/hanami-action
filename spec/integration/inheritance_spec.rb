@@ -2,30 +2,36 @@
 
 require "rack/test"
 
-module InheritanceSpec
-  class Action < Hanami::Action
-    before :log_base_action
+RSpec.describe Hanami::Action do
+  describe "inheritance" do
+    include Rack::Test::Methods
 
-    private
+    let(:base_action) do
+      Class.new(Hanami::Action) do
+        before :log_base_action
 
-    def log_base_action(*, res)
-      res[:base_action] = true
+        private
+
+        def log_base_action(*, res)
+          res[:base_action] = true
+        end
+      end
     end
-  end
 
-  class AuthenticatedAction < Action
-    before :authenticate!
+    let(:authenticated_action) do
+      Class.new(base_action) do
+        before :authenticate!
 
-    private
+        private
 
-    def authenticate!(*, res)
-      res[:authenticated] = true
+        def authenticate!(*, res)
+          res[:authenticated] = true
+        end
+      end
     end
-  end
 
-  module Controllers
-    module Books
-      class RestfulAction < AuthenticatedAction
+    let(:restful_action) do
+      Class.new(authenticated_action) do
         before :find_book
         after :render
 
@@ -39,41 +45,34 @@ module InheritanceSpec
           res.body = res.exposures.keys
         end
       end
+    end
 
-      class Show < RestfulAction
+    let(:show_action) do
+      Class.new(restful_action) do
         def handle(*, res)
           res[:found] = true
         end
       end
+    end
 
-      class Destroy < Show
+    let(:destroy_action) do
+      Class.new(show_action) do
         def handle(*, res)
           super
           res[:destroyed] = true
         end
       end
     end
-  end
 
-  class Application
-    def initialize
-      @routes = Hanami::Router.new do
-        get "/books/:id", to: InheritanceSpec::Controllers::Books::Show.new
-        delete "/books/:id", to: InheritanceSpec::Controllers::Books::Destroy.new
+    let(:app) do
+      show    = show_action.new
+      destroy = destroy_action.new
+
+      Hanami::Router.new do
+        get    "/books/:id", to: show
+        delete "/books/:id", to: destroy
       end
     end
-
-    def call(env)
-      @routes.call(env)
-    end
-  end
-end
-
-RSpec.describe Hanami::Action do
-  describe "inheritance" do
-    include Rack::Test::Methods
-
-    let(:app) { InheritanceSpec::Application.new }
 
     it "calls the exact chain of events" do
       get "/books/23"
