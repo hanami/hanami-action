@@ -578,4 +578,28 @@ RSpec.describe Hanami::Action::Params do
       end
     end
   end
+
+  describe "path params with validation schema" do
+    subject(:params_class) do
+      Class.new(described_class) do
+        params do
+          required(:book).schema do
+            required(:title).filled(:str?)
+          end
+        end
+      end
+    end
+
+    it "preserves path params that are not declared in the schema" do
+      env = {
+        "router.params" => {id: "42", book: {title: "Dune"}},
+        "rack.input" => StringIO.new,
+      }
+
+      params = params_class.new(env: env)
+
+      expect(params[:id]).to eq("42")
+      expect(params[:book]).to eq({title: "Dune"})
+    end
+  end
 end
