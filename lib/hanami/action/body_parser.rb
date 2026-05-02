@@ -21,10 +21,11 @@ module Hanami
         #
         # @return [void]
         def parse(env, config)
-          # If the router has already parsed the body, assign it to our own parsed body keys.
+          # If the router has already parsed the body, derive our own keys from it.
           if env.key?(ROUTER_PARSED_BODY)
-            env[ACTION_PARSED_BODY] = env[ROUTER_PARSED_BODY]
-            env[ACTION_BODY_PARAMS] = env[ROUTER_PARAMS] if env.key?(ROUTER_PARAMS)
+            parsed = env[ROUTER_PARSED_BODY]
+            env[ACTION_PARSED_BODY] = parsed
+            env[ACTION_BODY_PARAMS] = symbolize_body(parsed)
             return
           end
 
@@ -57,14 +58,8 @@ module Hanami
           # required.
           parsed = parser.call(body, env)
 
-          # Store the parsed body in Action-specific env keys.
-          symbolized = symbolize_body(parsed)
           env[ACTION_PARSED_BODY] = parsed
-          env[ACTION_BODY_PARAMS] = symbolized
-
-          # Set Hanami Router keys for backward compatibility.
-          env[ROUTER_PARSED_BODY] = parsed
-          env[ROUTER_PARAMS] = env.fetch(ROUTER_PARAMS, {}).merge(symbolized)
+          env[ACTION_BODY_PARAMS] = symbolize_body(parsed)
         end
 
         # rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity
