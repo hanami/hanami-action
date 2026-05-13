@@ -439,7 +439,7 @@ end
 class GetDefaultCookiesAction < Hanami::Action
   include Hanami::Action::Cookies
 
-  config.cookies = {domain: "hanamirb.org", path: "/controller", secure: true, httponly: true}
+  config.cookies = {domain: "hanamirb.org", path: "/action", secure: true, httponly: true}
 
   def handle(*, res)
     res.body          = ""
@@ -450,7 +450,7 @@ end
 class GetOverwrittenCookiesAction < Hanami::Action
   include Hanami::Action::Cookies
 
-  config.cookies = {domain: "hanamirb.org", path: "/controller", secure: true, httponly: true}
+  config.cookies = {domain: "hanamirb.org", path: "/action", secure: true, httponly: true}
 
   def handle(*, res)
     res.body          = ""
@@ -485,7 +485,7 @@ class SetCookiesWithOptionsAction < Hanami::Action
 
   def handle(*, res)
     res.cookies[:kukki] =
-      {value: "yum!", domain: "hanamirb.org", path: "/controller", expires: @expires, secure: true, httponly: true}
+      {value: "yum!", domain: "hanamirb.org", path: "/action", expires: @expires, secure: true, httponly: true}
   end
 end
 
@@ -922,7 +922,7 @@ module App2
 end
 
 module MusicPlayer
-  module Controllers
+  module Actions
     module Authentication
       def self.included(action)
         action.class_eval do
@@ -943,7 +943,7 @@ module MusicPlayer
       class Index < Hanami::Action
         include Hanami::Action::Cookies
         include Hanami::Action::Session
-        include MusicPlayer::Controllers::Authentication
+        include MusicPlayer::Actions::Authentication
 
         def handle(_req, res)
           res.body = "Muzic!"
@@ -954,7 +954,7 @@ module MusicPlayer
       class Show < Hanami::Action
         include Hanami::Action::Cookies
         include Hanami::Action::Session
-        include MusicPlayer::Controllers::Authentication
+        include MusicPlayer::Actions::Authentication
 
         def handle(_req, _res)
           raise ArgumentError
@@ -966,7 +966,7 @@ module MusicPlayer
       class Index < Hanami::Action
         include Hanami::Action::Cookies
         include Hanami::Action::Session
-        include MusicPlayer::Controllers::Authentication
+        include MusicPlayer::Actions::Authentication
 
         def handle(_req, res)
           res.body = current_user
@@ -976,7 +976,7 @@ module MusicPlayer
       class Show < Hanami::Action
         include Hanami::Action::Cookies
         include Hanami::Action::Session
-        include MusicPlayer::Controllers::Authentication
+        include MusicPlayer::Actions::Authentication
 
         config.handle_exception ArtistNotFound => 404
 
@@ -990,7 +990,7 @@ module MusicPlayer
   class StandaloneAction < Hanami::Action
     include Hanami::Action::Cookies
     include Hanami::Action::Session
-    include MusicPlayer::Controllers::Authentication
+    include MusicPlayer::Actions::Authentication
 
     def handle(_req, _res)
       raise ArgumentError
@@ -1259,7 +1259,7 @@ module HeadTest
 end
 
 module FullStack
-  module Controllers
+  module Actions
     module Home
       class Index < Hanami::Action
         include Hanami::Action::Session
@@ -1418,24 +1418,24 @@ module FullStack
   class Application
     def initialize # rubocop:disable Metrics/AbcSize
       routes = Hanami::Router.new do
-        get "/",     to: FullStack::Controllers::Home::Index.new
-        get "/head", to: FullStack::Controllers::Home::Head.new
+        get "/",     to: FullStack::Actions::Home::Index.new
+        get "/head", to: FullStack::Actions::Home::Head.new
         resources :books, only: %i[index create update]
 
-        get  "/settings", to: FullStack::Controllers::Settings::Index.new
-        post "/settings", to: FullStack::Controllers::Settings::Create.new
+        get  "/settings", to: FullStack::Actions::Settings::Index.new
+        post "/settings", to: FullStack::Actions::Settings::Create.new
 
-        get "/poll", to: FullStack::Controllers::Poll::Start.new
+        get "/poll", to: FullStack::Actions::Poll::Start.new
 
         prefix "poll" do
-          get  "/1", to: FullStack::Controllers::Poll::Step1.new
-          post "/1", to: FullStack::Controllers::Poll::Step1.new
-          get  "/2", to: FullStack::Controllers::Poll::Step2.new
-          post "/2", to: FullStack::Controllers::Poll::Step2.new
+          get  "/1", to: FullStack::Actions::Poll::Step1.new
+          post "/1", to: FullStack::Actions::Poll::Step1.new
+          get  "/2", to: FullStack::Actions::Poll::Step2.new
+          post "/2", to: FullStack::Actions::Poll::Step2.new
         end
 
         prefix "users" do
-          get "/1", to: FullStack::Controllers::Users::Show.new
+          get "/1", to: FullStack::Actions::Users::Show.new
         end
       end
 
@@ -1493,7 +1493,7 @@ class HandledRackExceptionSubclassAction < Hanami::Action
 end
 
 module SessionWithCookies
-  module Controllers
+  module Actions
     module Home
       class Index < Hanami::Action
         include Hanami::Action::Session
@@ -1507,9 +1507,9 @@ module SessionWithCookies
 
   class Application
     def initialize
-      resolver = EndpointResolver.new(namespace: SessionWithCookies::Controllers)
+      resolver = EndpointResolver.new(namespace: SessionWithCookies::Actions)
       routes   = Hanami::Router.new(resolver: resolver) do
-        get "/", to: SessionWithCookies::Controllers::Home::Index.new
+        get "/", to: SessionWithCookies::Actions::Home::Index.new
       end
 
       @renderer = Renderer.new
@@ -1527,7 +1527,7 @@ module SessionWithCookies
 end
 
 module SessionsWithoutCookies
-  module Controllers
+  module Actions
     module Home
       class Index < Hanami::Action
         include Hanami::Action::Session
@@ -1542,7 +1542,7 @@ module SessionsWithoutCookies
   class Application
     def initialize
       routes = Hanami::Router.new do
-        get "/", to: SessionsWithoutCookies::Controllers::Home::Index.new
+        get "/", to: SessionsWithoutCookies::Actions::Home::Index.new
       end
 
       @renderer = Renderer.new
@@ -1753,7 +1753,7 @@ module StandaloneSessionIntegration
 end
 
 module Flash
-  module Controllers
+  module Actions
     module Home
       class Index < Hanami::Action
         include Hanami::Action::Session
@@ -1831,15 +1831,15 @@ module Flash
   class Application
     def initialize
       routes = Hanami::Router.new do
-        get "/",      to: Flash::Controllers::Home::Index.new
-        post "/",     to: Flash::Controllers::Home::Index.new
-        get "/print", to: Flash::Controllers::Home::Print.new
-        get "/books", to: Flash::Controllers::Home::Books.new
-        get "/map_redirect",   to: Flash::Controllers::Home::MapRedirect.new
-        get "/each_redirect",  to: Flash::Controllers::Home::EachRedirect.new
-        get "/map",            to: Flash::Controllers::Home::Map.new
-        get "/each",           to: Flash::Controllers::Home::Each.new
-        get "/disabled",       to: Flash::Controllers::Home::Disabled.new
+        get "/",      to: Flash::Actions::Home::Index.new
+        post "/",     to: Flash::Actions::Home::Index.new
+        get "/print", to: Flash::Actions::Home::Print.new
+        get "/books", to: Flash::Actions::Home::Books.new
+        get "/map_redirect",   to: Flash::Actions::Home::MapRedirect.new
+        get "/each_redirect",  to: Flash::Actions::Home::EachRedirect.new
+        get "/map",            to: Flash::Actions::Home::Map.new
+        get "/each",           to: Flash::Actions::Home::Each.new
+        get "/disabled",       to: Flash::Actions::Home::Disabled.new
       end
 
       @middleware = Rack::Builder.new do
@@ -1875,7 +1875,7 @@ module Inheritance
     end
   end
 
-  module Controllers
+  module Actions
     module Books
       class RestfulAction < AuthenticatedAction
         before :find_book

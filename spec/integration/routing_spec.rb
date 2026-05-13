@@ -15,7 +15,7 @@ RSpec.describe "Hanami::Router integration" do
     expect(response.headers["X-Test"]).to eq("test")
   end
 
-  it "calls a controller's class action" do
+  it "calls an action class" do
     response = app.get("/team")
 
     expect(response.status).to            be(200)
@@ -23,7 +23,7 @@ RSpec.describe "Hanami::Router integration" do
     expect(response.headers["X-Test"]).to eq("test")
   end
 
-  it "calls a controller's action (with DSL)" do
+  it "calls an action (with DSL)" do
     response = app.get("/contacts")
 
     expect(response.status).to be(200)

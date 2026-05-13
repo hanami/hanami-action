@@ -127,7 +127,7 @@ module Hanami
       #   @example
       #     config.cookies = {
       #       domain: "hanamirb.org",
-      #       path: "/controller",
+      #       path: "/action",
       #       secure: true,
       #       httponly: true
       #     }

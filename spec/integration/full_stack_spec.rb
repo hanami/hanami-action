@@ -16,7 +16,7 @@ RSpec.describe "Full stack application" do
   it "passes action inside the Rack env" do
     get "/", {}, "HTTP_ACCEPT" => "text/html"
 
-    expect(last_response.body).to include("FullStack::Controllers::Home::Index")
+    expect(last_response.body).to include("FullStack::Actions::Home::Index")
     expect(last_response.body).to include(':greeting=>"Hello"')
   end
 
@@ -31,7 +31,7 @@ RSpec.describe "Full stack application" do
     post "/books", title: ""
     follow_redirect!
 
-    expect(last_response.body).to include("FullStack::Controllers::Books::Index")
+    expect(last_response.body).to include("FullStack::Actions::Books::Index")
     expect(last_response.body).to include("params: {}")
 
     get "/books"
@@ -42,13 +42,13 @@ RSpec.describe "Full stack application" do
     get "/poll"
     follow_redirect!
 
-    expect(last_response.body).to include("FullStack::Controllers::Poll::Step1")
+    expect(last_response.body).to include("FullStack::Actions::Poll::Step1")
     expect(last_response.body).to include("Start the poll")
 
     post "/poll/1", {}
     follow_redirect!
 
-    expect(last_response.body).to include("FullStack::Controllers::Poll::Step2")
+    expect(last_response.body).to include("FullStack::Actions::Poll::Step2")
     expect(last_response.body).to include("Step 1 completed")
   end
 

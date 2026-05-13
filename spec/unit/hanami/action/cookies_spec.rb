@@ -53,9 +53,9 @@ RSpec.describe Hanami::Action do
 
       expected_headers =
         if Hanami::Action.rack_3?
-          {"content-type" => "application/octet-stream; charset=utf-8", "set-cookie" => "kukki=yum%21; domain=hanamirb.org; path=/controller; expires=#{tomorrow.httpdate}; secure; httponly"}
+          {"content-type" => "application/octet-stream; charset=utf-8", "set-cookie" => "kukki=yum%21; domain=hanamirb.org; path=/action; expires=#{tomorrow.httpdate}; secure; httponly"}
         else
-          {"Content-Type" => "application/octet-stream; charset=utf-8", "Set-Cookie" => "kukki=yum%21; domain=hanamirb.org; path=/controller; expires=#{tomorrow.httpdate}; secure; HttpOnly"}
+          {"Content-Type" => "application/octet-stream; charset=utf-8", "Set-Cookie" => "kukki=yum%21; domain=hanamirb.org; path=/action; expires=#{tomorrow.httpdate}; secure; HttpOnly"}
         end
       expect(response.headers).to eq(expected_headers)
     end
@@ -87,9 +87,9 @@ RSpec.describe Hanami::Action do
         response = action.call({})
         expected_headers =
           if Hanami::Action.rack_3?
-            {"content-type" => "application/octet-stream; charset=utf-8", "set-cookie" => "bar=foo; domain=hanamirb.org; path=/controller; secure; httponly"}
+            {"content-type" => "application/octet-stream; charset=utf-8", "set-cookie" => "bar=foo; domain=hanamirb.org; path=/action; secure; httponly"}
           else
-            {"Content-Length" => "0", "Content-Type" => "application/octet-stream; charset=utf-8", "Set-Cookie" => "bar=foo; domain=hanamirb.org; path=/controller; secure; HttpOnly"}
+            {"Content-Length" => "0", "Content-Type" => "application/octet-stream; charset=utf-8", "Set-Cookie" => "bar=foo; domain=hanamirb.org; path=/action; secure; HttpOnly"}
           end
         expect(response.headers).to eq(expected_headers)
       end

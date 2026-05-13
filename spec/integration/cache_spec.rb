@@ -78,7 +78,7 @@ module CacheControl
 end
 
 module Web
-  module Controllers
+  module Actions
     module Home
       class Index < Hanami::Action
         def handle(*)
@@ -89,7 +89,7 @@ module Web
 end
 
 module Admin
-  module Controllers
+  module Actions
     module Home
       class Index < Hanami::Action
         def handle(*)
