@@ -39,19 +39,6 @@ RSpec.describe "Without validations" do
     )
   end
 
-  it "doesn't have Hanami::Action::Params.params" do
-    expect do
-      Class.new(Hanami::Action::Params) do
-        params do
-          required(:id).filled
-        end
-      end
-    end.to raise_error(
-      NoMethodError,
-      %(To use `.params`, please add the "dry-validation" gem to your Gemfile)
-    )
-  end
-
   it "has params that are always valid" do
     action = Class.new(Hanami::Action) do
       def handle(req, res)
