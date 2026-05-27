@@ -616,17 +616,13 @@ class ParamsAction < Hanami::Action
 end
 
 class AllowlistedParamsAction < Hanami::Action
-  class Params < Hanami::Action::Params
-    params do
-      required(:id).maybe(:integer)
+  params do
+    required(:id).maybe(:integer)
 
-      required(:article).schema do
-        required(:tags).each(:str?)
-      end
+    required(:article).schema do
+      required(:tags).each(:str?)
     end
   end
-
-  params Params
 
   def handle(req, res)
     res.body = req.params.to_h.inspect
@@ -664,7 +660,7 @@ class ParamsValidationAction < Hanami::Action
   end
 end
 
-class TestParams < Hanami::Action::Params
+class TestContract < Dry::Validation::Contract
   params do
     required(:email).filled(format?: /\A.+@.+\z/)
 
@@ -692,7 +688,7 @@ class TestParams < Hanami::Action::Params
   end
 end
 
-class NestedParams < Hanami::Action::Params
+class NestedContract < Dry::Validation::Contract
   params do
     required(:signup).schema do
       required(:name).filled(:str?)

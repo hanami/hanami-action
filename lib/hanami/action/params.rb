@@ -131,29 +131,6 @@ module Hanami
         end
       end
 
-      # Defines validations for the params, using the `params` schema of a dry-validation contract.
-      #
-      # @param block [Proc] the schema definition
-      #
-      # @see https://dry-rb.org/gems/dry-validation/
-      #
-      # @api public
-      # @since 0.7.0
-      def self.params(&block)
-        unless defined?(Dry::Validation::Contract)
-          message = %(To use `.params`, please add the "dry-validation" gem to your Gemfile)
-          raise NoMethodError, message
-        end
-
-        @_contract = Class.new(Dry::Validation::Contract) { params(&block || -> {}) }.new
-      end
-
-      class << self
-        # @api private
-        # @since 2.2.0
-        attr_reader :_contract
-      end
-
       # @attr_reader env [Hash] the Rack env
       #
       # @since 0.7.0
@@ -195,10 +172,7 @@ module Hanami
         @env = env
         @raw = _extract_params
 
-        # Fall back to the default contract here, rather than in the `._contract` method itself.
-        # This allows `._contract` to return nil when there is no user-defined contract, which is
-        # important for the backwards compatibility behavior in `Validatable::ClassMethods#params`.
-        contract ||= self.class._contract || DefaultContract
+        contract ||= DefaultContract
         validation = contract.call(raw)
 
         @params = validation.to_h

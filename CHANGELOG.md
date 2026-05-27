@@ -17,6 +17,28 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Removed
 
+- Removed `Hanami::Action::Params.params` and support for defining a contract by subclassing `Hanami::Action::Params`. If you are subclassing `Hanami::Action::Params`, take your params block and move it into a `Dry::Validation::Contract` subclass.  Then pass this contract class to `Hanami::Action.params` or `Hanami::Action.contract`. (@timriley)
+
+  ```ruby
+  # Before
+  # class SignupParams < Hanami::Action::Params
+  #   params do
+  #     required(:email).filled(:str?)
+  #   end
+  # end
+  
+  # After
+  class SignupContract < Dry::Validation::Contract
+    params do
+      required(:email).filled(:str?)
+    end
+  end
+  
+  class Signup < Hanami::Action
+    params SignupParams
+  end
+  ```
+
 ### Fixed
 
 ### Security
