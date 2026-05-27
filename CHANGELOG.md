@@ -12,6 +12,9 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 ### Changed
 
 - Renamed gem from hanami-controller to hanami-action. You should now `require "hanami-action"` or `require "hanami/action"`. (@timriley in #507)
+- Cache the action's resolved configuration as a frozen `Data` snapshot (via dry-configurable's `#to_data`) at initialization, avoiding repeated config lookups on the request hot path for improved memory usage and speed. Required bumping `dry-configurable` to `~> 1.4`. (@cllns)
+
+  **Potentially breaking:** the action's config is now finalized (frozen) when the action is initialized, so mutating it from instance code (`config.handle_exception(...)`, `config.handled_exceptions = ...`, etc.) no longer works. This was previously possible only because `Action#initialize`'s `freeze` froze the instance shallowly without finalizing the config — instance-scope config mutation was an undocumented side effect, not a supported pattern. A downstream consequence is that `instance.config` is now a `Data` value object rather than the live `Hanami::Action::Config`, so `Config`-specific methods like `#handle_exception` aren't defined on instances; all setting readers (`config.formats`, `config.default_headers`, `config.default_charset`, etc.) work identically.
 
 ### Deprecated
 

@@ -277,7 +277,15 @@ module Hanami
       config.handle_exception(...)
     end
 
-    # @since 2.0.0
+    # Returns the action's frozen `Data` snapshot of its resolved configuration.
+    #
+    # Instances expose `config` as a read-only `Data` value object (built via
+    # dry-configurable's `#to_data`), not the live `Hanami::Action::Config` used at the class
+    # level. All setting readers (`formats`, `default_headers`, `default_charset`, etc.) work
+    # exactly the same; Config-specific methods like `#handle_exception` are not available on
+    # instances and must be called on the class config instead.
+    #
+    # @since x.x.x
     # @api private
     private attr_reader :config
 
@@ -290,7 +298,8 @@ module Hanami
     # @since 2.0.0
     # @api public
     def initialize(config: self.class.config, contract: nil)
-      @config = config
+      config.finalize!
+      @config = config.to_data
       @contract = contract || config.contract_class&.new # TODO: tests showing this overridden by a dep
       freeze
     end
