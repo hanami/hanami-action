@@ -48,13 +48,15 @@ module Hanami
 
       # @since 2.0.0
       # @api private
-      def initialize(request:, config:, content_type: nil, env: {}, headers: {}, view_options: nil, session_enabled: false) # rubocop:disable Layout/LineLength
+      def initialize(request:, config:, content_type: nil, charset: nil, env: {}, headers: {}, view_options: nil, session_enabled: false) # rubocop:disable Layout/LineLength
         super([], 200, headers.dup)
         self.content_type = content_type if content_type
 
         @request = request
         @config = config
-        @charset = ::Rack::MediaType.params(content_type).fetch("charset", nil)
+        # Prefer the charset supplied by the action (computed once from config); only fall back to
+        # parsing it out of the content type when a caller constructs a Response without one.
+        @charset = charset || (::Rack::MediaType.params(content_type).fetch("charset", nil) if content_type)
         @exposures = {}
         @env = env
         @view_options = view_options || DEFAULT_VIEW_OPTIONS

@@ -293,6 +293,13 @@ module Hanami
     # @api private
     private attr_reader :contract
 
+    # Resolved response charset, computed once from config. Passed to each {Response} so it
+    # doesn't have to re-parse the content type's charset on every request.
+    #
+    # @since x.x.x
+    # @api private
+    private attr_reader :default_charset
+
     # Returns a new action
     #
     # @since 2.0.0
@@ -300,6 +307,7 @@ module Hanami
     def initialize(config: self.class.config, contract: nil)
       @config = config.finalize!.to_data
       @contract = contract || config.contract_class&.new # TODO: tests showing this overridden by a dep
+      @default_charset = @config.default_charset || DEFAULT_CHARSET
       freeze
     end
 
@@ -343,6 +351,7 @@ module Hanami
           request: request,
           config: config,
           content_type: Mime.response_content_type_with_charset(request, config),
+          charset: default_charset,
           env: env,
           headers: config.default_headers,
           session_enabled: session_enabled?
@@ -482,8 +491,9 @@ module Hanami
     #
     # @since 2.0.0
     # @api private
-    def build_response(request:, config:, content_type:, env:, headers:, session_enabled:, view_options: nil)
-      Response.new(request:, config:, content_type:, env:, headers:, session_enabled:, view_options:)
+    def build_response(request:, config:, content_type:, env:, headers:, session_enabled:, charset: nil,
+                       view_options: nil)
+      Response.new(request:, config:, content_type:, charset:, env:, headers:, session_enabled:, view_options:)
     end
 
     # @since 0.2.0
