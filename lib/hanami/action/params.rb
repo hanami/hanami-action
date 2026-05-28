@@ -24,22 +24,9 @@ module Hanami
     #
     # @since 0.1.0
     class Params
-      # Permits all params and returns them as symbolized keys. Stands in for a
-      # `Dry::Validation::Contract` when neither {Action.params} nor {Action.contract} are called.
-      #
-      # @see {Params#initialize}
-      #
-      # @since 2.2.0
+      # @since x.x.x
       # @api private
-      class DefaultContract
-        def self.call(attrs) = Result.new(attrs)
-
-        class Result
-          def initialize(attrs) = @attrs = Utils::Hash.deep_symbolize(attrs)
-          def to_h = @attrs
-          def errors = {}
-        end
-      end
+      EMPTY_PARAMS = {}.freeze
 
       # Params errors
       #
@@ -172,11 +159,16 @@ module Hanami
         @env = env
         @raw = _extract_params
 
-        contract ||= DefaultContract
-        validation = contract.call(raw)
-
-        @params = validation.to_h
-        @errors = Errors.new(validation.errors.to_h)
+        if contract
+          validation = contract.call(raw)
+          @params = validation.to_h
+          @errors = Errors.new(validation.errors.to_h)
+        else
+          # No contract configured: permit all params with symbolized keys, skipping
+          # `deep_symbolize` when there's nothing to do.
+          @params = raw.empty? ? EMPTY_PARAMS : Utils::Hash.deep_symbolize(raw)
+          @errors = Errors.new
+        end
 
         freeze
       end
