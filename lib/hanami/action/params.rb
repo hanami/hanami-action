@@ -306,26 +306,41 @@ module Hanami
 
       private
 
-      def _extract_params # rubocop:disable Metrics/AbcSize
+      def _extract_params # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         # Without PATH_INFO (URL path from a server) or rack.input (request body), env has no
         # Rack-sourced data for us to parse as params; it's likely a bare hash passed to
         # `Action#call` for convenience in tests. In this case, treat the env itself as the params.
-        return env unless env.key?("PATH_INFO") || env.key?(RACK_INPUT)
+        return env unless env.key?(PATH_INFO) || env.key?(RACK_INPUT)
+
+        query_string = env[::Rack::QUERY_STRING]
+        has_query = query_string && !query_string.empty?
+        has_router_params = env.key?(ROUTER_PARAMS)
+        has_body_params = env.key?(ACTION_BODY_PARAMS)
+        # Only a form-urlencoded/multipart body yields params via Rack; other bodies (e.g. JSON)
+        # are handled by BodyParser, which sets ACTION_BODY_PARAMS.
+        has_form_body =
+          env.key?(RACK_INPUT) && !has_body_params && _form_content_type?(env[CONTENT_TYPE])
+
+        # Fast path: nothing in env produces params, so avoid allocating a Rack::Request.
+        return EMPTY_PARAMS unless has_query || has_form_body || has_router_params || has_body_params
 
         result = {}
-        rack_request = ::Rack::Request.new(env)
+        rack_request = ::Rack::Request.new(env) if has_query || has_form_body
 
-        # Start with the query string params.
-        result.merge!(rack_request.GET)
-
-        # Merge form-urlencoded body params if there's a body and BodyParser hasn't consumed it.
-        result.merge!(rack_request.POST) if env.key?(RACK_INPUT) && !env.key?(ACTION_BODY_PARAMS)
-
-        # Merge route params, then finally the BodyParser-parsed body (which wins on collisions).
-        result.merge!(env[ROUTER_PARAMS]) if env.key?(ROUTER_PARAMS)
-        result.merge!(env[ACTION_BODY_PARAMS]) if env.key?(ACTION_BODY_PARAMS)
+        # Query string params first, then form body, then route params, then the BodyParser-parsed
+        # body (each later source wins on key collisions).
+        result.merge!(rack_request.GET) if has_query
+        result.merge!(rack_request.POST) if has_form_body
+        result.merge!(env[ROUTER_PARAMS]) if has_router_params
+        result.merge!(env[ACTION_BODY_PARAMS]) if has_body_params
 
         result
+      end
+
+      def _form_content_type?(content_type)
+        return false unless content_type
+
+        content_type.start_with?("application/x-www-form-urlencoded", "multipart/form-data")
       end
     end
   end
