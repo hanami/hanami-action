@@ -474,16 +474,16 @@ module Hanami
     #
     # @since 2.0.0
     # @api private
-    def build_request(**options)
-      Request.new(**options)
+    def build_request(env:, params:, session_enabled:, default_tld_length:)
+      Request.new(env:, params:, session_enabled:, default_tld_length:)
     end
 
     # Hook to be overridden by `Hanami::Extensions::Action` for integrated actions
     #
     # @since 2.0.0
     # @api private
-    def build_response(**options)
-      Response.new(**options)
+    def build_response(request:, config:, content_type:, env:, headers:, session_enabled:, view_options: nil)
+      Response.new(request:, config:, content_type:, env:, headers:, session_enabled:, view_options:)
     end
 
     # @since 0.2.0
@@ -535,15 +535,15 @@ module Hanami
 
     # @since 0.1.0
     # @api private
-    def _run_before_callbacks(*args)
-      config.before_callbacks.run(self, *args)
+    def _run_before_callbacks(req, res)
+      config.before_callbacks.run(self, req, res)
       nil
     end
 
     # @since 0.1.0
     # @api private
-    def _run_after_callbacks(*args)
-      config.after_callbacks.run(self, *args)
+    def _run_after_callbacks(req, res)
+      config.after_callbacks.run(self, req, res)
       nil
     end
 
