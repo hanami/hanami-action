@@ -300,6 +300,13 @@ module Hanami
     # @api private
     private attr_reader :default_charset
 
+    # Response content type (with charset) and format used when a request has no usable `Accept`
+    # header. These depend only on config, so they're computed once and reused per request.
+    #
+    # @since x.x.x
+    # @api private
+    private attr_reader :default_response_content_type, :default_response_format
+
     # Returns a new action
     #
     # @since 2.0.0
@@ -308,6 +315,8 @@ module Hanami
       @config = config.finalize!.to_data
       @contract = contract || config.contract_class&.new # TODO: tests showing this overridden by a dep
       @default_charset = @config.default_charset || DEFAULT_CHARSET
+      @default_response_content_type = Mime.default_response_content_type_with_charset(@config)
+      @default_response_format = Mime.format_from_media_type(@default_response_content_type, @config)
       freeze
     end
 
@@ -347,10 +356,20 @@ module Hanami
           session_enabled: session_enabled?,
           default_tld_length: config.default_tld_length
         )
+
+        # Only negotiate the content type when the request carries an `Accept` header; otherwise
+        # reuse the action's precomputed default.
+        content_type =
+          if request.accept_header?
+            Mime.response_content_type_with_charset(request, config)
+          else
+            default_response_content_type
+          end
+
         response = build_response(
           request: request,
           config: config,
-          content_type: Mime.response_content_type_with_charset(request, config),
+          content_type: content_type,
           charset: default_charset,
           env: env,
           headers: config.default_headers,
@@ -639,7 +658,13 @@ module Hanami
       _empty_headers(res) if _requires_empty_headers?(res)
       _empty_body(res) if res.head?
 
-      res.set_format(Mime.format_from_media_type(res.content_type, config))
+      format =
+        if res.content_type == default_response_content_type
+          default_response_format
+        else
+          Mime.format_from_media_type(res.content_type, config)
+        end
+      res.set_format(format)
       res[:params] = req.params
       res[:format] = res.format
       res
