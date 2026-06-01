@@ -298,8 +298,7 @@ module Hanami
     # @since 2.0.0
     # @api public
     def initialize(config: self.class.config, contract: nil)
-      config.finalize!
-      @config = config.to_data
+      @config = config.finalize!.to_data
       @contract = contract || config.contract_class&.new # TODO: tests showing this overridden by a dep
       freeze
     end
