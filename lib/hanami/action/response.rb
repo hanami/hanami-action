@@ -78,9 +78,16 @@ module Hanami
       # @api public
       def body=(str)
         @length = 0
-        @body = EMPTY_BODY.dup
 
-        return if str.nil? || str == EMPTY_BODY
+        # When the body is being cleared (nil or the empty sentinel), use the frozen EMPTY_BODY
+        # constant directly. Only allocate a fresh mutable array when we actually have content to
+        # append via #write.
+        if str.nil? || str == EMPTY_BODY
+          @body = EMPTY_BODY
+          return
+        end
+
+        @body = []
 
         if str.is_a?(::Rack::Files::BaseIterator)
           @body = str
