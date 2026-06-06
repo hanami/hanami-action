@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "concurrent/map"
 require "dry/configurable"
 require "hanami/utils"
 require "hanami/utils/callbacks"
@@ -305,6 +306,21 @@ module Hanami
     # @api private
     private attr_reader :default_response_content_type, :default_response_format
 
+    # Per-action cache of negotiated response content types, keyed by the request's `Accept`
+    # header string. The negotiation result is fully determined by `(Accept, config)` and config
+    # is frozen at init, so the value is safe to memoize. Most production traffic sends a small
+    # set of distinct Accept strings per route, so caching avoids re-running the
+    # (allocation-heavy) `Rack::Utils.q_values` + `Rack::Mime.match?` pipeline on every request.
+    #
+    # The cache is unbounded: an action that sees an unbounded variety of Accept strings (e.g.
+    # from hostile traffic without an upstream Accept-normalizing proxy) will grow this Map. The
+    # typical production deployment behind a load balancer / CDN sees a handful of distinct
+    # Accept strings per route.
+    #
+    # @since x.x.x
+    # @api private
+    private attr_reader :accept_content_type_cache
+
     # Returns a new action
     #
     # @since 2.0.0
@@ -315,6 +331,7 @@ module Hanami
       @default_charset = @config.default_charset || DEFAULT_CHARSET
       @default_response_content_type = Mime.default_response_content_type_with_charset(@config)
       @default_response_format = Mime.format_from_media_type(@default_response_content_type, @config)
+      @accept_content_type_cache = Concurrent::Map.new
       freeze
     end
 
@@ -357,7 +374,9 @@ module Hanami
 
         content_type =
           if request.accept_header?
-            Mime.response_content_type_with_charset(request, config)
+            accept_content_type_cache.fetch_or_store(request.accept) do
+              Mime.response_content_type_with_charset(request, config)
+            end
           else
             default_response_content_type
           end
