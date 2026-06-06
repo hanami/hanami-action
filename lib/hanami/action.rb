@@ -312,14 +312,23 @@ module Hanami
     # set of distinct Accept strings per route, so caching avoids re-running the
     # (allocation-heavy) `Rack::Utils.q_values` + `Rack::Mime.match?` pipeline on every request.
     #
-    # The cache is unbounded: an action that sees an unbounded variety of Accept strings (e.g.
-    # from hostile traffic without an upstream Accept-normalizing proxy) will grow this Map. The
-    # typical production deployment behind a load balancer / CDN sees a handful of distinct
-    # Accept strings per route.
+    # The cache is soft-capped at {ACCEPT_CONTENT_TYPE_CACHE_MAX_SIZE} entries. Beyond that, the
+    # action still negotiates the content type correctly but skips the store, so an action
+    # exposed to hostile traffic with unbounded distinct Accept strings can't grow this Map
+    # without bound.
     #
     # @since x.x.x
     # @api private
     private attr_reader :accept_content_type_cache
+
+    # Soft cap on the per-action Accept-string cache. Typical production routes see ~5-20
+    # distinct Accept headers (a handful of browsers, common API clients, a few bots); 64
+    # leaves room for the long tail without growing memory needlessly. At ~100 bytes per entry,
+    # an action at the cap costs ~6 kB.
+    #
+    # @since x.x.x
+    # @api private
+    ACCEPT_CONTENT_TYPE_CACHE_MAX_SIZE = 64
 
     # Returns a new action
     #
@@ -374,9 +383,7 @@ module Hanami
 
         content_type =
           if request.accept_header?
-            accept_content_type_cache.fetch_or_store(request.accept) do
-              Mime.response_content_type_with_charset(request, config)
-            end
+            negotiated_response_content_type(request)
           else
             default_response_content_type
           end
@@ -481,6 +488,25 @@ module Hanami
     alias_method :_requires_empty_headers?, :_requires_no_body?
 
     private
+
+    # Returns the negotiated response content type (with charset) for a request that carries an
+    # `Accept` header, memoized in {accept_content_type_cache}. The cache is soft-capped: past
+    # {ACCEPT_CONTENT_TYPE_CACHE_MAX_SIZE} entries new Accept values are computed but not stored,
+    # so hostile traffic with unbounded distinct Accept strings can't grow the cache without
+    # bound. Entries cached before the cap is reached still hit the fast path.
+    #
+    # @since x.x.x
+    # @api private
+    def negotiated_response_content_type(request)
+      cache = accept_content_type_cache
+      if cache.size < ACCEPT_CONTENT_TYPE_CACHE_MAX_SIZE
+        cache.fetch_or_store(request.accept) do
+          Mime.response_content_type_with_charset(request, config)
+        end
+      else
+        cache[request.accept] || Mime.response_content_type_with_charset(request, config)
+      end
+    end
 
     # @since 2.0.0
     # @api private

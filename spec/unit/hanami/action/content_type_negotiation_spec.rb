@@ -134,5 +134,50 @@ RSpec.describe Hanami::Action do
           .to eq("text/html; charset=utf-8")
       end
     end
+
+    context "when many distinct Accept headers are seen on the same instance" do
+      let(:action_class) do
+        Class.new(described_class) do
+          def handle(*); end
+        end
+      end
+      let(:action) { action_class.new }
+      let(:cap) { Hanami::Action::ACCEPT_CONTENT_TYPE_CACHE_MAX_SIZE }
+
+      it "still returns correct content types past the cache cap" do
+        # Send (cap + 100) distinct Accept strings. The cache should soft-cap at `cap`,
+        # but every call must still return a valid content type.
+        (cap + 100).times do |i|
+          response = action.call("HTTP_ACCEPT" => "application/x-test-#{i}")
+          # Unknown Accept types fall back to "application/octet-stream" (the `:all` format).
+          expect(response.headers["Content-Type"]).to eq("application/octet-stream; charset=utf-8")
+        end
+      end
+
+      it "soft-caps the cache so it doesn't grow without bound" do
+        (cap + 100).times do |i|
+          action.call("HTTP_ACCEPT" => "application/x-test-#{i}")
+        end
+
+        cache = action.send(:accept_content_type_cache)
+        expect(cache.size).to be <= cap
+      end
+
+      it "keeps serving cached entries that landed before the cap was reached" do
+        # Warm one entry early.
+        warmed = action.call("HTTP_ACCEPT" => "text/html").headers["Content-Type"]
+        expect(warmed).to eq("text/html; charset=utf-8")
+
+        # Fill the cache past the cap with junk.
+        (cap + 100).times do |i|
+          action.call("HTTP_ACCEPT" => "application/x-test-#{i}")
+        end
+
+        # The warmed entry should still be cached and still produce the same answer.
+        cache = action.send(:accept_content_type_cache)
+        expect(cache["text/html"]).to eq("text/html; charset=utf-8")
+        expect(action.call("HTTP_ACCEPT" => "text/html").headers["Content-Type"]).to eq("text/html; charset=utf-8")
+      end
+    end
   end
 end
