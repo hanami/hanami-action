@@ -163,8 +163,6 @@ module Hanami
           @params = validation.to_h
           @errors = Errors.new(validation.errors.to_h)
         else
-          # No contract configured: permit all params with symbolized keys, skipping
-          # `deep_symbolize` when there's nothing to do.
           @params = raw.empty? ? EMPTY_PARAMS : Utils::Hash.deep_symbolize(raw)
           @errors = Errors.new
         end
@@ -326,8 +324,6 @@ module Hanami
         result = {}
         rack_request = ::Rack::Request.new(env) if has_query || has_form_body
 
-        # Query string params first, then form body, then route params, then the BodyParser-parsed
-        # body (each later source wins on key collisions).
         result.merge!(rack_request.GET) if has_query
         result.merge!(rack_request.POST) if has_form_body
         result.merge!(env[ROUTER_PARAMS]) if has_router_params

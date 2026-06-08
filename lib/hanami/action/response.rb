@@ -77,9 +77,6 @@ module Hanami
       def body=(str)
         @length = 0
 
-        # When the body is being cleared (nil or the empty sentinel), use the frozen EMPTY_BODY
-        # constant directly. Only allocate a fresh mutable array when we actually have content to
-        # append via #write.
         if str.nil? || str == EMPTY_BODY
           @body = EMPTY_BODY
           return

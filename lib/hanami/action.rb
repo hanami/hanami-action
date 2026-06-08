@@ -355,8 +355,6 @@ module Hanami
           default_tld_length: config.default_tld_length
         )
 
-        # Only negotiate the content type when the request carries an `Accept` header; otherwise
-        # reuse the action's precomputed default.
         content_type =
           if request.accept_header?
             Mime.response_content_type_with_charset(request, config)
