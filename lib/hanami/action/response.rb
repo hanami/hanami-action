@@ -59,9 +59,7 @@ module Hanami
 
         @request = request
         @config = config
-        # Prefer the charset supplied by the action (computed once from config); only fall back to
-        # parsing it out of the content type when a caller constructs a Response without one.
-        @charset = charset || (::Rack::MediaType.params(content_type).fetch("charset", nil) if content_type)
+        @charset = charset
         @exposures = {}
         @env = env
         @view_options = view_options || DEFAULT_VIEW_OPTIONS
