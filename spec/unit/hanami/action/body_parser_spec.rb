@@ -173,7 +173,7 @@ RSpec.describe Hanami::Action::BodyParser do
       it "parses application/vnd.api+json" do
         # Register JSON:API format with vnd.api+json content type
         config.formats.register(:jsonapi, "application/vnd.api+json",
-                                content_types: ["application/vnd.api+json"])
+          content_types: ["application/vnd.api+json"])
         config.formats.accept :jsonapi
 
         env = {
