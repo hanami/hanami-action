@@ -70,7 +70,6 @@ module Hanami
     # The request content type (env key, CGI-style uppercase). Rack exposes a `CONTENT_TYPE`
     # constant but it refers to the response header (lowercase in Rack 3), not the env key.
     #
-    # @since x.x.x
     # @api private
     CONTENT_TYPE = "CONTENT_TYPE"
 

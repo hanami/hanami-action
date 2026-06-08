@@ -182,7 +182,6 @@ module Hanami
         #
         # @see Action#call
         #
-        # @since x.x.x
         # @api private
         def default_response_content_type_with_charset(config)
           content_type_with_charset(

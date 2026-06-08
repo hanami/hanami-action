@@ -24,7 +24,6 @@ module Hanami
     #
     # @since 0.1.0
     class Params
-      # @since x.x.x
       # @api private
       EMPTY_PARAMS = {}.freeze
 

@@ -296,14 +296,12 @@ module Hanami
     # Resolved response charset, computed once from config. Passed to each {Response} so it
     # doesn't have to re-parse the content type's charset on every request.
     #
-    # @since x.x.x
     # @api private
     private attr_reader :default_charset
 
     # Response content type (with charset) and format used when a request has no usable `Accept`
     # header. These depend only on config, so they're computed once and reused per request.
     #
-    # @since x.x.x
     # @api private
     private attr_reader :default_response_content_type, :default_response_format
 
