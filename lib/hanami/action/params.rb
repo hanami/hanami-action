@@ -67,14 +67,14 @@ module Hanami
         #       end
         #     end
         #
-        #     def handle(req, res)
+        #     def handle(request, response)
         #       # 1. Don't try to save the record if the params aren't valid
-        #       return unless req.params.valid?
+        #       return unless request.params.valid?
         #
-        #       BookRepository.new.create(req.params[:book])
+        #       BookRepository.new.create(request.params[:book])
         #     rescue Hanami::Model::UniqueConstraintViolationError
         #       # 2. Add an error in case the record wasn't unique
-        #       req.params.errors.add(:book, :isbn, "is not unique")
+        #       request.params.errors.add(:book, :isbn, "is not unique")
         #     end
         #   end
         #
@@ -88,13 +88,13 @@ module Hanami
         #       end
         #     end
         #
-        #     def handle(req, *)
-        #       puts req.params.to_h   # => {}
-        #       puts req.params.valid? # => false
-        #       puts req.params.error_messages # => ["Book is missing"]
-        #       puts req.params.errors         # => {:book=>["is missing"]}
+        #     def handle(request, *)
+        #       puts request.params.to_h   # => {}
+        #       puts request.params.valid? # => false
+        #       puts request.params.error_messages # => ["Book is missing"]
+        #       puts request.params.errors         # => {:book=>["is missing"]}
         #
-        #       req.params.errors.add(:book, :isbn, "is not unique") # => ArgumentError
+        #       request.params.errors.add(:book, :isbn, "is not unique") # => ArgumentError
         #     end
         #   end
         def add(*args)
@@ -199,18 +199,18 @@ module Hanami
       #
       #   module Deliveries
       #     class Create < Hanami::Action
-      #       def handle(req, *)
-      #         req.params.get(:customer_name)     # => "Luca"
-      #         req.params.get(:uknown)            # => nil
+      #       def handle(request, *)
+      #         request.params.get(:customer_name)     # => "Luca"
+      #         request.params.get(:uknown)            # => nil
       #
-      #         req.params.get(:address, :city)    # => "Rome"
-      #         req.params.get(:address, :unknown) # => nil
+      #         request.params.get(:address, :city)    # => "Rome"
+      #         request.params.get(:address, :unknown) # => nil
       #
-      #         req.params.get(:tags, 0)           # => "foo"
-      #         req.params.get(:tags, 1)           # => "bar"
-      #         req.params.get(:tags, 999)         # => nil
+      #         request.params.get(:tags, 0)           # => "foo"
+      #         request.params.get(:tags, 1)           # => "bar"
+      #         request.params.get(:tags, 999)         # => nil
       #
-      #         req.params.get(nil)                # => nil
+      #         request.params.get(nil)                # => nil
       #       end
       #     end
       #   end
