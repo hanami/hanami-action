@@ -333,7 +333,9 @@ module Hanami
       end
 
       def _form_content_type?(content_type)
-        return false unless content_type
+        # Rack form-parses a body with no declared Content-Type by default, so we must too;
+        # otherwise such params would be silently dropped instead of merged.
+        return true if content_type.nil? || content_type.empty?
 
         content_type.start_with?("application/x-www-form-urlencoded", "multipart/form-data")
       end

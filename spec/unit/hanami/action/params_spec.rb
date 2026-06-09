@@ -543,6 +543,24 @@ RSpec.describe Hanami::Action::Params do
     end
   end
 
+  describe "form body without a Content-Type header" do
+    let(:action) { ParamsAction.new }
+
+    # Regression: Rack form-parses a urlencoded body even when no Content-Type is sent. The
+    # fast path in `_extract_params` must still capture these params rather than dropping them.
+    it "captures urlencoded body params" do
+      response = action.call(
+        "REQUEST_METHOD" => "POST",
+        "PATH_INFO" => "/",
+        "QUERY_STRING" => "",
+        "rack.input" => StringIO.new("a=1&b=2")
+      )
+
+      expect(response[:params][:a]).to eq("1")
+      expect(response[:params][:b]).to eq("2")
+    end
+  end
+
   describe "inheritance" do
     let(:action) { Class.new(AllowlistedParamsAction).new }
 
