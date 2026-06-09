@@ -174,6 +174,22 @@ module Hanami
           )
         end
 
+        # Returns the default response Content-Type (with charset) for a request without a usable
+        # `Accept` header. This depends only on config, so an action can compute it once and reuse
+        # it across requests instead of recomputing per call.
+        #
+        # @return [String]
+        #
+        # @see Action#call
+        #
+        # @api private
+        def default_response_content_type_with_charset(config)
+          content_type_with_charset(
+            default_response_content_type(config),
+            config.default_charset || Action::DEFAULT_CHARSET
+          )
+        end
+
         # Returns a format name for the given content type.
         #
         # The format name will come from the configured formats, if such a format is configured
@@ -363,11 +379,19 @@ module Hanami
             return content_type if content_type
           end
 
-          if config.formats.default
-            return format_to_media_type(config.formats.default, config)
-          end
+          default_response_content_type(config)
+        end
 
-          Action::DEFAULT_CONTENT_TYPE
+        # Returns the response media type for a request without a usable `Accept` header: the
+        # configured default format's media type, or the global default content type.
+        #
+        # @api private
+        def default_response_content_type(config)
+          if config.formats.default
+            format_to_media_type(config.formats.default, config)
+          else
+            Action::DEFAULT_CONTENT_TYPE
+          end
         end
 
         # @api private

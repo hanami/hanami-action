@@ -34,7 +34,7 @@ module Hanami
           input = env[::Rack::RACK_INPUT]
           return unless input
 
-          media_type = Mime.extract_media_type(env["CONTENT_TYPE"])
+          media_type = Mime.extract_media_type(env[CONTENT_TYPE])
           return unless media_type
 
           if config.formats.empty?

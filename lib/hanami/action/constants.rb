@@ -67,6 +67,12 @@ module Hanami
     # @api private
     PATH_INFO = ::Rack::PATH_INFO
 
+    # The request content type (env key, CGI-style uppercase). Rack exposes a `CONTENT_TYPE`
+    # constant but it refers to the response header (lowercase in Rack 3), not the env key.
+    #
+    # @api private
+    CONTENT_TYPE = "CONTENT_TYPE"
+
     # The request method
     #
     # @since 0.3.2

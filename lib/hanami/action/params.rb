@@ -24,22 +24,8 @@ module Hanami
     #
     # @since 0.1.0
     class Params
-      # Permits all params and returns them as symbolized keys. Stands in for a
-      # `Dry::Validation::Contract` when neither {Action.params} nor {Action.contract} are called.
-      #
-      # @see {Params#initialize}
-      #
-      # @since 2.2.0
       # @api private
-      class DefaultContract
-        def self.call(attrs) = Result.new(attrs)
-
-        class Result
-          def initialize(attrs) = @attrs = Utils::Hash.deep_symbolize(attrs)
-          def to_h = @attrs
-          def errors = {}
-        end
-      end
+      EMPTY_PARAMS = {}.freeze
 
       # Params errors
       #
@@ -80,14 +66,14 @@ module Hanami
         #       end
         #     end
         #
-        #     def handle(req, res)
+        #     def handle(request, response)
         #       # 1. Don't try to save the record if the params aren't valid
-        #       return unless req.params.valid?
+        #       return unless request.params.valid?
         #
-        #       BookRepository.new.create(req.params[:book])
+        #       BookRepository.new.create(request.params[:book])
         #     rescue Hanami::Model::UniqueConstraintViolationError
         #       # 2. Add an error in case the record wasn't unique
-        #       req.params.errors.add(:book, :isbn, "is not unique")
+        #       request.params.errors.add(:book, :isbn, "is not unique")
         #     end
         #   end
         #
@@ -101,13 +87,13 @@ module Hanami
         #       end
         #     end
         #
-        #     def handle(req, *)
-        #       puts req.params.to_h   # => {}
-        #       puts req.params.valid? # => false
-        #       puts req.params.error_messages # => ["Book is missing"]
-        #       puts req.params.errors         # => {:book=>["is missing"]}
+        #     def handle(request, *)
+        #       puts request.params.to_h   # => {}
+        #       puts request.params.valid? # => false
+        #       puts request.params.error_messages # => ["Book is missing"]
+        #       puts request.params.errors         # => {:book=>["is missing"]}
         #
-        #       req.params.errors.add(:book, :isbn, "is not unique") # => ArgumentError
+        #       request.params.errors.add(:book, :isbn, "is not unique") # => ArgumentError
         #     end
         #   end
         def add(*args)
@@ -172,11 +158,14 @@ module Hanami
         @env = env
         @raw = _extract_params
 
-        contract ||= DefaultContract
-        validation = contract.call(raw)
-
-        @params = validation.to_h
-        @errors = Errors.new(validation.errors.to_h)
+        if contract
+          validation = contract.call(raw)
+          @params = validation.to_h
+          @errors = Errors.new(validation.errors.to_h)
+        else
+          @params = raw.empty? ? EMPTY_PARAMS : Utils::Hash.deep_symbolize(raw)
+          @errors = Errors.new
+        end
 
         freeze
       end
@@ -207,18 +196,18 @@ module Hanami
       #
       #   module Deliveries
       #     class Create < Hanami::Action
-      #       def handle(req, *)
-      #         req.params.get(:customer_name)     # => "Luca"
-      #         req.params.get(:uknown)            # => nil
+      #       def handle(request, *)
+      #         request.params.get(:customer_name)     # => "Luca"
+      #         request.params.get(:uknown)            # => nil
       #
-      #         req.params.get(:address, :city)    # => "Rome"
-      #         req.params.get(:address, :unknown) # => nil
+      #         request.params.get(:address, :city)    # => "Rome"
+      #         request.params.get(:address, :unknown) # => nil
       #
-      #         req.params.get(:tags, 0)           # => "foo"
-      #         req.params.get(:tags, 1)           # => "bar"
-      #         req.params.get(:tags, 999)         # => nil
+      #         request.params.get(:tags, 0)           # => "foo"
+      #         request.params.get(:tags, 1)           # => "bar"
+      #         request.params.get(:tags, 999)         # => nil
       #
-      #         req.params.get(nil)                # => nil
+      #         request.params.get(nil)                # => nil
       #       end
       #     end
       #   end
@@ -314,26 +303,39 @@ module Hanami
 
       private
 
-      def _extract_params # rubocop:disable Metrics/AbcSize
+      def _extract_params # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         # Without PATH_INFO (URL path from a server) or rack.input (request body), env has no
         # Rack-sourced data for us to parse as params; it's likely a bare hash passed to
         # `Action#call` for convenience in tests. In this case, treat the env itself as the params.
-        return env unless env.key?("PATH_INFO") || env.key?(RACK_INPUT)
+        return env unless env.key?(PATH_INFO) || env.key?(RACK_INPUT)
+
+        query_string = env[::Rack::QUERY_STRING]
+        has_query = query_string && !query_string.empty?
+        has_router_params = env.key?(ROUTER_PARAMS)
+        has_body_params = env.key?(ACTION_BODY_PARAMS)
+        # Only a form-urlencoded/multipart body yields params via Rack; other bodies (e.g. JSON)
+        # are handled by BodyParser, which sets ACTION_BODY_PARAMS.
+        has_form_body =
+          env.key?(RACK_INPUT) && !has_body_params && _form_content_type?(env[CONTENT_TYPE])
+
+        # Fast path: nothing in env produces params, so avoid allocating a Rack::Request.
+        return EMPTY_PARAMS unless has_query || has_form_body || has_router_params || has_body_params
 
         result = {}
-        rack_request = ::Rack::Request.new(env)
+        rack_request = ::Rack::Request.new(env) if has_query || has_form_body
 
-        # Start with the query string params.
-        result.merge!(rack_request.GET)
-
-        # Merge form-urlencoded body params if there's a body and BodyParser hasn't consumed it.
-        result.merge!(rack_request.POST) if env.key?(RACK_INPUT) && !env.key?(ACTION_BODY_PARAMS)
-
-        # Merge route params, then finally the BodyParser-parsed body (which wins on collisions).
-        result.merge!(env[ROUTER_PARAMS]) if env.key?(ROUTER_PARAMS)
-        result.merge!(env[ACTION_BODY_PARAMS]) if env.key?(ACTION_BODY_PARAMS)
+        result.merge!(rack_request.GET) if has_query
+        result.merge!(rack_request.POST) if has_form_body
+        result.merge!(env[ROUTER_PARAMS]) if has_router_params
+        result.merge!(env[ACTION_BODY_PARAMS]) if has_body_params
 
         result
+      end
+
+      def _form_content_type?(content_type)
+        return false unless content_type
+
+        content_type.start_with?("application/x-www-form-urlencoded", "multipart/form-data")
       end
     end
   end

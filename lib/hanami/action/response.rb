@@ -48,13 +48,18 @@ module Hanami
 
       # @since 2.0.0
       # @api private
-      def initialize(request:, config:, content_type: nil, env: {}, headers: {}, view_options: nil, session_enabled: false) # rubocop:disable Layout/LineLength
-        super([], 200, headers.dup)
+      def initialize(request:, config:, content_type: nil, charset: nil, env: {}, headers: {}, view_options: nil, session_enabled: false) # rubocop:disable Layout/LineLength
+        # `Rack::Response#initialize` copies the headers into its own internal store on both Rack
+        # 2.2+ (`Utils::HeaderHash[headers]`) and Rack 3.x (`Headers.new` + per-entry copy), so it
+        # never aliases the hash passed in. That means we can skip a defensive `headers.dup` here
+        # and avoid an allocation per request without risk of pollution. See the regression spec
+        # in `spec/unit/hanami/action/response_spec.rb` if you're tempted to add one back.
+        super([], 200, headers)
         self.content_type = content_type if content_type
 
         @request = request
         @config = config
-        @charset = ::Rack::MediaType.params(content_type).fetch("charset", nil)
+        @charset = charset
         @exposures = {}
         @env = env
         @view_options = view_options || DEFAULT_VIEW_OPTIONS
@@ -71,9 +76,13 @@ module Hanami
       # @api public
       def body=(str)
         @length = 0
-        @body = EMPTY_BODY.dup
 
-        return if str.nil? || str == EMPTY_BODY
+        if str.nil? || str == EMPTY_BODY
+          @body = EMPTY_BODY
+          return
+        end
+
+        @body = []
 
         if str.is_a?(::Rack::Files::BaseIterator)
           @body = str

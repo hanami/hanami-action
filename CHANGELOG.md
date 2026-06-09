@@ -16,6 +16,8 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
   **Potentially breaking:** the action's config is now finalized (frozen) when the action is initialized, so mutating it from instance code (`config.handle_exception(...)`, `config.handled_exceptions = ...`, etc.) no longer works. This was previously possible only because `Action#initialize`'s `freeze` froze the instance shallowly without finalizing the config — instance-scope config mutation was an undocumented side effect, not a supported pattern. A downstream consequence is that `instance.config` is now a `Data` value object rather than the live `Hanami::Action::Config`, so `Config`-specific methods like `#handle_exception` aren't defined on instances; all setting readers (`config.formats`, `config.default_headers`, `config.default_charset`, etc.) work identically.
 
+- Cut per-request allocations on the `Hanami::Action#call` hot path, roughly halving allocations and increasing throughput ~1.5–2.5× per action invocation. A minimal action drops from 51 to 16 allocations (69% fewer, 2.45× faster); an action with formats negotiating an `Accept` header drops from 95 to 61 allocations (36% fewer, 1.55× faster). (@cllns in #514)
+
 ### Deprecated
 
 ### Removed

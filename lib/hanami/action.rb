@@ -23,7 +23,7 @@ module Hanami
   #   require "hanami/action"
   #
   #   class Show < Hanami::Action
-  #     def handle(req, res)
+  #     def handle(request, response)
   #       # ...
   #     end
   #   end
@@ -159,7 +159,7 @@ module Hanami
     #     class Show < Hanami::Action
     #       before :authenticate, :set_article
     #
-    #       def handle(req, res)
+    #       def handle(request, response)
     #       end
     #
     #       private
@@ -184,9 +184,9 @@ module Hanami
     #
     #     class Show < Hanami::Action
     #       before { ... } # 1 do some authentication stuff
-    #       before {|req, res| @article = Article.find params[:id] } # 2
+    #       before {|request, response| @article = Article.find params[:id] } # 2
     #
-    #       def handle(req, res)
+    #       def handle(request, response)
     #       end
     #     end
     #
@@ -293,6 +293,18 @@ module Hanami
     # @api private
     private attr_reader :contract
 
+    # Resolved response charset, computed once from config. Passed to each {Response} so it
+    # doesn't have to re-parse the content type's charset on every request.
+    #
+    # @api private
+    private attr_reader :default_charset
+
+    # Response content type (with charset) and format used when a request has no usable `Accept`
+    # header. These depend only on config, so they're computed once and reused per request.
+    #
+    # @api private
+    private attr_reader :default_response_content_type, :default_response_format
+
     # Returns a new action
     #
     # @since 2.0.0
@@ -300,6 +312,9 @@ module Hanami
     def initialize(config: self.class.config, contract: nil)
       @config = config.finalize!.to_data
       @contract = contract || config.contract_class&.new # TODO: tests showing this overridden by a dep
+      @default_charset = @config.default_charset || DEFAULT_CHARSET
+      @default_response_content_type = Mime.default_response_content_type_with_charset(@config)
+      @default_response_format = Mime.format_from_media_type(@default_response_content_type, @config)
       freeze
     end
 
@@ -339,10 +354,19 @@ module Hanami
           session_enabled: session_enabled?,
           default_tld_length: config.default_tld_length
         )
+
+        content_type =
+          if request.accept_header?
+            Mime.response_content_type_with_charset(request, config)
+          else
+            default_response_content_type
+          end
+
         response = build_response(
           request: request,
           config: config,
-          content_type: Mime.response_content_type_with_charset(request, config),
+          content_type: content_type,
+          charset: default_charset,
           env: env,
           headers: config.default_headers,
           session_enabled: session_enabled?
@@ -429,8 +453,8 @@ module Hanami
 
     # @since 0.3.2
     # @api private
-    def _requires_no_body?(res)
-      HTTP_STATUSES_WITHOUT_BODY.include?(res.status)
+    def _requires_no_body?(response)
+      HTTP_STATUSES_WITHOUT_BODY.include?(response.status)
     end
 
     # @since 2.0.0
@@ -474,24 +498,25 @@ module Hanami
     #
     # @since 2.0.0
     # @api private
-    def build_request(**options)
-      Request.new(**options)
+    def build_request(env:, params:, session_enabled:, default_tld_length:)
+      Request.new(env:, params:, session_enabled:, default_tld_length:)
     end
 
     # Hook to be overridden by `Hanami::Extensions::Action` for integrated actions
     #
     # @since 2.0.0
     # @api private
-    def build_response(**options)
-      Response.new(**options)
+    def build_response(request:, config:, content_type:, env:, headers:, session_enabled:, charset: nil,
+                       view_options: nil)
+      Response.new(request:, config:, content_type:, charset:, env:, headers:, session_enabled:, view_options:)
     end
 
     # @since 0.2.0
     # @api private
-    def _reference_in_rack_errors(req, exception)
-      req.env[RACK_EXCEPTION] = exception
+    def _reference_in_rack_errors(request, exception)
+      request.env[RACK_EXCEPTION] = exception
 
-      if errors = req.env[RACK_ERRORS]
+      if errors = request.env[RACK_ERRORS]
         errors.write(_dump_exception(exception))
         errors.flush
       end
@@ -505,17 +530,17 @@ module Hanami
 
     # @since 0.1.0
     # @api private
-    def _handle_exception(req, res, exception)
+    def _handle_exception(request, response, exception)
       handler = exception_handler(exception)
 
       if handler.nil?
-        _reference_in_rack_errors(req, exception)
+        _reference_in_rack_errors(request, exception)
         raise exception
       end
 
       instance_exec(
-        req,
-        res,
+        request,
+        response,
         exception,
         &_exception_handler(handler)
       )
@@ -535,15 +560,15 @@ module Hanami
 
     # @since 0.1.0
     # @api private
-    def _run_before_callbacks(*args)
-      config.before_callbacks.run(self, *args)
+    def _run_before_callbacks(request, response)
+      config.before_callbacks.run(self, request, response)
       nil
     end
 
     # @since 0.1.0
     # @api private
-    def _run_after_callbacks(*args)
-      config.after_callbacks.run(self, *args)
+    def _run_after_callbacks(request, response)
+      config.after_callbacks.run(self, request, response)
       nil
     end
 
@@ -571,16 +596,16 @@ module Hanami
     #
     #   module Books
     #     class Destroy < Hanami::Action
-    #       def handle(*, res)
+    #       def handle(*, response)
     #         # ...
-    #         res.headers.merge!(
+    #         response.headers.merge!(
     #           "Last-Modified" => "Fri, 27 Nov 2015 13:32:36 GMT",
     #           "X-Rate-Limit"  => "4000",
     #           "Content-Type"  => "application/json",
     #           "X-No-Pass"     => "true"
     #         )
     #
-    #         res.status = 204
+    #         response.status = 204
     #       end
     #
     #       private
@@ -602,14 +627,14 @@ module Hanami
 
     # @since 2.0.0
     # @api private
-    def _empty_headers(res)
-      res.headers.select! { |header, _| keep_response_header?(header) }
+    def _empty_headers(response)
+      response.headers.select! { |header, _| keep_response_header?(header) }
     end
 
     # @since 2.0.0
     # @api private
-    def _empty_body(res)
-      res.body = Response::EMPTY_BODY
+    def _empty_body(response)
+      response.body = Response::EMPTY_BODY
     end
 
     # Finalize the response
@@ -623,16 +648,22 @@ module Hanami
     # @see Hanami::Action::Session#finish
     # @see Hanami::Action::Cookies#finish
     # @see Hanami::Action::Cache#finish
-    def finish(req, res, halted)
-      res.status, res.body = *halted unless halted.nil?
+    def finish(request, response, halted)
+      response.status, response.body = *halted unless halted.nil?
 
-      _empty_headers(res) if _requires_empty_headers?(res)
-      _empty_body(res) if res.head?
+      _empty_headers(response) if _requires_empty_headers?(response)
+      _empty_body(response) if response.head?
 
-      res.set_format(Mime.format_from_media_type(res.content_type, config))
-      res[:params] = req.params
-      res[:format] = res.format
-      res
+      format =
+        if response.content_type == default_response_content_type
+          default_response_format
+        else
+          Mime.format_from_media_type(response.content_type, config)
+        end
+      response.set_format(format)
+      response[:params] = request.params
+      response[:format] = response.format
+      response
     end
   end
 end

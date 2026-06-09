@@ -128,6 +128,34 @@ RSpec.describe Hanami::Action do
         )
       end
     end
+
+    describe "shared default_headers isolation" do
+      # Regression test for Response#initialize passing headers straight to Rack::Response
+      # without duping. This is safe because every supported Rack version (2.2.16+ and 3.x)
+      # copies the headers hash into its own internal store, so it never aliases the input.
+      # If a future Rack ever changed that, this spec would fail loudly instead of silently
+      # leaking response state (Content-Type, cookies, etc.) across requests.
+      let(:action_class) do
+        Class.new(described_class) do
+          config.default_headers = {"X-Frame-Options" => "DENY"}
+          def handle(_req, res) = res.body = ("ok")
+        end
+      end
+
+      it "does not pollute the shared config.default_headers across requests" do
+        action = action_class.new
+        before = action_class.config.default_headers.dup
+
+        3.times do
+          action.call(
+            "REQUEST_METHOD" => "GET", "PATH_INFO" => "/", "QUERY_STRING" => "",
+            "HTTP_ACCEPT" => "application/json"
+          )
+        end
+
+        expect(action_class.config.default_headers).to eq(before)
+      end
+    end
   end
 
   describe "request" do
