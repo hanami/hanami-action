@@ -26,6 +26,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
   **Possibly breaking:** the action's config is now finalized (frozen) when the action is initialized, so mutating it from instance code is no longer possible. This was only ever an undocumented side-effect of implementation, not a supported pattern.
 - Cut per-request allocations on the `Hanami::Action#call` hot path, roughly halving allocations and increasing throughput ~1.5–2.5× per action invocation. A minimal action drops from 51 to 16 allocations (69% fewer, 2.45× faster); an action with formats negotiating an `Accept` header drops from 95 to 61 allocations (36% fewer, 1.55× faster). (@cllns in #514)
+- Require Ruby 3.3 or newer.
 
 ### Deprecated
 
