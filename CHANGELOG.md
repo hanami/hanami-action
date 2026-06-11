@@ -19,7 +19,15 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Security
 
-[Unreleased]: https://github.com/hanami/hanami-controller/compare/v2.3.1...main
+[Unreleased]: https://github.com/hanami/hanami-controller/compare/v2.3.2...HEAD
+
+## [2.3.2] - 2026-06-12
+
+### Fixed
+
+- Allow the gem to be eager loadeded by Zeitwerk. (@timriley in #515)
+
+[2.3.2]: https://github.com/hanami/hanami-controller/compare/v2.3.1...v2.3.2
 
 ## [2.3.1] - 2025-12-06
 
