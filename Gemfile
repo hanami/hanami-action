@@ -16,18 +16,18 @@ if ENV["RACK_MATRIX_VALUE"]
   gem "rack", ENV["RACK_MATRIX_VALUE"]
 end
 
-gem "hanami-utils", github: "hanami/utils", branch: "main"
+gem "hanami-utils", "~> 2.3"
 
 group :validations do
-  gem "hanami-validations", github: "hanami/validations", branch: "main"
+  gem "hanami-validations", "~> 2.3"
 end
 
 group :test do
-  gem "dry-files", github: "dry-rb/dry-files", branch: "main"
-  gem "hanami-router", github: "hanami/router", branch: "main"
-  gem "hanami-cli", github: "hanami/cli", branch: "main"
-  gem "hanami-view", github: "hanami/view", branch: "main"
-  gem "hanami", github: "hanami/hanami", branch: "main"
+  gem "dry-files", "~> 1.1"
+  gem "hanami-router", "~> 2.3"
+  gem "hanami-cli", "~> 2.3"
+  gem "hanami-view", "~> 2.3"
+  gem "hanami", "~> 2.3"
   gem "rack-test", "~> 2.0"
   gem "rspec", "~> 3.9"
   gem "slim"

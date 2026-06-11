@@ -7,11 +7,11 @@ require "hanami/utils/kernel"
 require "hanami/utils/string"
 require "rack"
 require "rack/utils"
-require "hanami/action/rack_utils"
 require "zeitwerk"
 
 require_relative "action/constants"
 require_relative "action/errors"
+require_relative "action/rack_utils"
 
 module Hanami
   # An HTTP endpoint
@@ -40,7 +40,7 @@ module Hanami
         loader.ignore(
           "#{root}/hanami-controller.rb",
           "#{root}/hanami/controller/version.rb",
-          "#{root}/hanami/action/{constants,errors,validatable}.rb"
+          "#{root}/hanami/action/{constants,errors,rack_utils,validatable}.rb"
         )
         loader.inflector.inflect("csrf_protection" => "CSRFProtection")
       end
