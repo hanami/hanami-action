@@ -23,7 +23,6 @@ Gem::Specification.new do |spec|
 
   spec.extra_rdoc_files = ["README.md", "CHANGELOG.md", "LICENSE"]
 
-  spec.metadata["allowed_push_host"] = "https://rubygems.org"
   spec.metadata["changelog_uri"]     = "https://github.com/hanami/hanami-controller/blob/main/CHANGELOG.md"
   spec.metadata["source_code_uri"]   = "https://github.com/hanami/hanami-controller"
   spec.metadata["bug_tracker_uri"]   = "https://github.com/hanami/hanami-controller/issues"
@@ -37,4 +36,3 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "dry-core", "~> 1.0"
   spec.add_runtime_dependency "zeitwerk", "~> 2.6"
 end
-
