@@ -40,7 +40,7 @@ class Renderer
     if response[0] == 200
       response[2] =
         "#{action.class.name} params: #{env['router.params'].to_h} flash: #{env['rack.session'].fetch('flash',
-                                                                                                      nil).inspect}"
+          nil).inspect}"
     end
   end
 end
