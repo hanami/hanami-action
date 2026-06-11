@@ -46,6 +46,8 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Fixed
 
+- Fixed params dropping a form-urlencoded body sent without a `Content-Type` header (regression in #514). (@cllns in #XXX)
+
 ### Security
 
 [Unreleased]: https://github.com/hanami/hanami-action/compare/v2.3.1...main
