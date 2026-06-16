@@ -44,7 +44,10 @@ module Hanami
           "#{root}/hanami/action/version.rb",
           "#{root}/hanami/action/{constants,errors,rack_utils,validatable}.rb"
         )
-        loader.inflector.inflect("csrf_protection" => "CSRFProtection")
+        loader.inflector.inflect(
+          "csrf_protection" => "CSRFProtection",
+          "json" => "JSON"
+        )
       end
     end
 

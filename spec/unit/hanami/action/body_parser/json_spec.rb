@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Hanami::Action::BodyParsers::JSON, ".call" do
+RSpec.describe Hanami::Action::BodyParser::JSON, ".call" do
   it "parses valid JSON" do
     body = '{"user":{"name":"Alice","address":{"city":"Rome"}}}'
     result = described_class.call(body, {})

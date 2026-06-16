@@ -92,12 +92,12 @@ RSpec.describe Hanami::Action::Config::Formats do
     end
 
     it "includes default parsers for JSON" do
-      expect(formats.body_parser_for("application/json")).to eq(Hanami::Action::BodyParsers::JSON)
-      expect(formats.body_parser_for("application/vnd.api+json")).to eq(Hanami::Action::BodyParsers::JSON)
+      expect(formats.body_parser_for("application/json")).to eq(Hanami::Action::BodyParser::JSON)
+      expect(formats.body_parser_for("application/vnd.api+json")).to eq(Hanami::Action::BodyParser::JSON)
     end
 
     it "includes default parser for multipart forms" do
-      expect(formats.body_parser_for("multipart/form-data")).to eq(Hanami::Action::BodyParsers::MultipartForm)
+      expect(formats.body_parser_for("multipart/form-data")).to eq(Hanami::Action::BodyParser::MultipartForm)
     end
   end
 
@@ -105,7 +105,7 @@ RSpec.describe Hanami::Action::Config::Formats do
     it "returns parser for registered content type" do
       parser = formats.body_parser_for("application/json")
 
-      expect(parser).to eq(Hanami::Action::BodyParsers::JSON)
+      expect(parser).to eq(Hanami::Action::BodyParser::JSON)
     end
 
     it "returns nil for unregistered content type" do
@@ -115,7 +115,7 @@ RSpec.describe Hanami::Action::Config::Formats do
     it "is case-insensitive" do
       parser = formats.body_parser_for("APPLICATION/JSON")
 
-      expect(parser).to eq(Hanami::Action::BodyParsers::JSON)
+      expect(parser).to eq(Hanami::Action::BodyParser::JSON)
     end
 
     it "handles nil content type" do
