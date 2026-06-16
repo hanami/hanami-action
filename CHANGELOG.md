@@ -20,6 +20,31 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Changed
 
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+[Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.0.rc1...HEAD
+
+## [3.0.0.rc1] - 2026-06-16
+
+### Added
+
+- Parse request bodies based on formats config. (@timriley in #500, #503, #511, @cllns in #508)
+
+    Parsers for multipart form bodies and JSON are included by default. These require `formats.accept :html` and `formats.accept :json` respectively. When no formats are configured, multipart form bodies are parsed if found.
+
+    Custom parsers may be registered via e.g. `formats.register(:custom, "application/custom", parser: ->(body, env) { ... })` or directly via `formats.body_parsers["application/custom"] = parser`.
+
+    Parsed body keys are deeply symbolized. Non-hash bodies are wrapped in `{_: parsed_body}`.
+- Full JRuby support. (@katafrakt in #498)
+
+### Changed
+
 - Renamed gem from hanami-controller to hanami-action. You should now `require "hanami-action"` or `require "hanami/action"`. (@timriley in #507, @cllns in df365b5)
 - Check for the dry-validation gem (instead of hanami-validations, which is now retired) before loading `Action.params` and `Action.contract` support. (@timriley in #505)
 - Cache the action's resolved configuration as a frozen `Data` snapshot (via dry-configurable's `#to_data`) at initialization, avoiding repeated config lookups on the request hot path for improved memory usage and speed. Required bumping `dry-configurable` to `~> 1.4`. (@cllns in #512)
@@ -27,8 +52,6 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
   **Possibly breaking:** the action's config is now finalized (frozen) when the action is initialized, so mutating it from instance code is no longer possible. This was only ever an undocumented side-effect of implementation, not a supported pattern.
 - Cut per-request allocations on the `Hanami::Action#call` hot path, roughly halving allocations and increasing throughput ~1.5–2.5× per action invocation. A minimal action drops from 51 to 16 allocations (69% fewer, 2.45× faster); an action with formats negotiating an `Accept` header drops from 95 to 61 allocations (36% fewer, 1.55× faster). (@cllns in #514)
 - Require Ruby 3.3 or newer.
-
-### Deprecated
 
 ### Removed
 
@@ -55,11 +78,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
   end
   ```
 
-### Fixed
-
-### Security
-
-[Unreleased]: https://github.com/hanami/hanami-action/compare/v2.3.2...HEAD
+[3.0.0.rc1]: https://github.com/hanami/hanami-action/compare/v2.3.2...v3.0.0.rc1
 
 ## [2.3.2] - 2026-06-12
 

@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = ">= 3.3"
 
   spec.add_runtime_dependency "rack", ">= 2.2.16"
-  spec.add_runtime_dependency "hanami-utils", "~> 2.3.0"
+  spec.add_runtime_dependency "hanami-utils", "~> 3.0.0.rc"
   spec.add_runtime_dependency "dry-configurable", "~> 1.4"
   spec.add_runtime_dependency "dry-core", "~> 1.0"
   spec.add_runtime_dependency "zeitwerk", "~> 2.6"
