@@ -2,7 +2,7 @@
 
 require "stringio"
 
-RSpec.describe Hanami::Action::BodyParsers::MultipartForm, ".call" do
+RSpec.describe Hanami::Action::BodyParser::MultipartForm, ".call" do
   it "parses multipart form data" do
     boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
     body = [

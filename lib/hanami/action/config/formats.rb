@@ -243,15 +243,12 @@ module Hanami
         private
 
         def register_default_body_parsers
-          require_relative "../body_parsers/json"
-          require_relative "../body_parsers/multipart_form"
-
           # Multipart forms (ordinary urlencoded forms are handled by Rack automatically)
-          @body_parsers["multipart/form-data"] = BodyParsers::MultipartForm
+          @body_parsers["multipart/form-data"] = BodyParser::MultipartForm
 
           # JSON
-          @body_parsers["application/json"] = BodyParsers::JSON
-          @body_parsers["application/vnd.api+json"] = BodyParsers::JSON
+          @body_parsers["application/json"] = BodyParser::JSON
+          @body_parsers["application/vnd.api+json"] = BodyParser::JSON
         end
       end
     end
