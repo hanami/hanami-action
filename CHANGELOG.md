@@ -9,13 +9,13 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Added
 
-- Parse request bodies based on formats config. (@timriley in #500, #503, #511, @cllns in #508)
+- Parse request bodies based on formats config. (@timriley in #500, #503, #511, #519, @cllns in #508)
 
     Parsers for multipart form bodies and JSON are included by default. These require `formats.accept :html` and `formats.accept :json` respectively. When no formats are configured, multipart form bodies are parsed if found.
 
     Custom parsers may be registered via e.g. `formats.register(:custom, "application/custom", parser: ->(body, env) { ... })` or directly via `formats.body_parsers["application/custom"] = parser`.
 
-    Parsed body keys are deeply symbolized. Non-hash bodies are wrapped in `{_: parsed_body}`.
+    Parsed body params are symbolized as part of becoming the `Hanami::Action::Params` instance. Non-hash bodies are wrapped in `{"_" => parsed_body}`.
 - Full JRuby support. (@katafrakt in #498)
 
 ### Changed

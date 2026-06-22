@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rack"
-require "hanami/utils/hash"
 
 module Hanami
   class Action
@@ -9,7 +8,7 @@ module Hanami
     #
     # @api private
     module BodyParser
-      FALLBACK_KEY = :_
+      FALLBACK_KEY = "_"
 
       class << self
         # rubocop:disable Metrics/AbcSize, Metrics/PerceivedComplexity
@@ -25,7 +24,7 @@ module Hanami
           if env.key?(ROUTER_PARSED_BODY)
             parsed = env[ROUTER_PARSED_BODY]
             env[ACTION_PARSED_BODY] = parsed
-            env[ACTION_BODY_PARAMS] = symbolize_body(parsed)
+            env[ACTION_BODY_PARAMS] = body_params(parsed)
             return
           end
 
@@ -59,7 +58,7 @@ module Hanami
           parsed = parser.call(body, env)
 
           env[ACTION_PARSED_BODY] = parsed
-          env[ACTION_BODY_PARAMS] = symbolize_body(parsed)
+          env[ACTION_BODY_PARAMS] = body_params(parsed)
         end
 
         # rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity
@@ -83,25 +82,12 @@ module Hanami
           body
         end
 
-        # Symbolizes the parsed body, wrapping non-hash values in a fallback key.
-        def symbolize_body(parsed)
-          if parsed.is_a?(::Hash)
-            deep_symbolize(parsed)
-          else
-            {FALLBACK_KEY => deep_symbolize(parsed)}
-          end
-        end
-
-        # Recursively symbolizes hash keys within any structure (arrays or hashes).
-        def deep_symbolize(value)
-          case value
-          when ::Hash
-            Utils::Hash.deep_symbolize(value)
-          when ::Array
-            value.map { deep_symbolize(_1) }
-          else
-            value
-          end
+        # Wraps a parsed body into a hash suitable for merging into params.
+        #
+        # Hash bodies are returned as-is; non-hash bodies (e.g. JSON arrays) are wrapped under
+        # {FALLBACK_KEY}. Keys are left as strings. Symbolization happens in {Params}.
+        def body_params(parsed)
+          parsed.is_a?(::Hash) ? parsed : {FALLBACK_KEY => parsed}
         end
       end
     end
