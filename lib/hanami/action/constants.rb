@@ -235,34 +235,40 @@ module Hanami
     # @api private
     RACK_INPUT = ::Rack::RACK_INPUT
 
-    # The key that returns a request body parsed by Hanami Action.
+    # The key that holds the body parser's verbatim output for the request.
     #
-    # This is the canonical key for body parsing.
+    # This holds whatever the parser returned, and may be any type (a hash for most bodies, but
+    # possibly an array or scalar for JSON bodies). It mirrors the router's {ROUTER_PARSED_BODY} as
+    # the faithful representation of the parsed body.
     #
-    # @since x.x.x
+    # For the params-ready form (always a hash, with keys merged into the request params), see
+    # {ACTION_BODY_PARAMS}.
+    #
     # @api private
     ACTION_PARSED_BODY = "hanami.action.parsed_body"
 
-    # The key that returns params from a parsed body by Hanami Action.
+    # The key that holds the parsed body normalized into a hash for merging into the request params.
     #
-    # This is the canonical key for parsed body params.
+    # Hash bodies keep the string keys sent by the client; these are symbolized later by
+    # {Hanami::Action::Params}.. Non-Hash bodies (such as a top-level JSON array) are wrapped under
+    # `"_"` so they can still be merged.
     #
-    # @since x.x.x
+    # For the parser's verbatim (possibly non-hash) output, see {ACTION_PARSED_BODY}.
+    #
     # @api private
     ACTION_BODY_PARAMS = "hanami.action.body_params"
 
     # The key that returns a request body parsed by Hanami Router.
     #
-    # This is maintained for backward compatibility with Hanami Router.
+    # This is maintained for compatibility with Hanami Router's body parser middlware.
     #
     # @api private
     ROUTER_PARSED_BODY = "router.parsed_body"
 
     # The key that returns router params from the Rack env.
     #
-    # This is maintained for backward compatibility with Hanami Router.
+    # This is maintained for compatibility with Hanami Router's body parser middlware.
     #
-    # @since 2.0.0
     # @api private
     ROUTER_PARAMS = "router.params"
 

@@ -12,7 +12,7 @@ RSpec.describe Hanami::Action::BodyParser do
       described_class.parse(env, config)
 
       expect(env["hanami.action.parsed_body"]).to eq("existing" => "data")
-      expect(env["hanami.action.body_params"]).to eq(existing: "data")
+      expect(env["hanami.action.body_params"]).to eq("existing" => "data")
       expect(env).not_to have_key("router.params")
     end
 
@@ -73,7 +73,7 @@ RSpec.describe Hanami::Action::BodyParser do
       described_class.parse(env, config)
 
       expect(env["hanami.action.parsed_body"]).to eq("title" => "My Title")
-      expect(env["hanami.action.body_params"]).to eq(title: "My Title")
+      expect(env["hanami.action.body_params"]).to eq("title" => "My Title")
     end
 
     it "does not parse multipart/form-data automatically once any format is explicitly configured" do
@@ -151,7 +151,7 @@ RSpec.describe Hanami::Action::BodyParser do
         described_class.parse(env, config)
 
         expect(env["hanami.action.parsed_body"]).to eq("name" => "Alice", "age" => 30)
-        expect(env["hanami.action.body_params"]).to eq(name: "Alice", age: 30)
+        expect(env["hanami.action.body_params"]).to eq("name" => "Alice", "age" => 30)
       end
 
       it "leaves existing router.params untouched when parsing JSON" do
@@ -166,7 +166,7 @@ RSpec.describe Hanami::Action::BodyParser do
         described_class.parse(env, config)
 
         expect(env["hanami.action.parsed_body"]).to eq("comment" => {"body" => "hello"})
-        expect(env["hanami.action.body_params"]).to eq(comment: {body: "hello"})
+        expect(env["hanami.action.body_params"]).to eq("comment" => {"body" => "hello"})
         expect(env["router.params"]).to eq(slug: "my-article")
       end
 
@@ -184,7 +184,7 @@ RSpec.describe Hanami::Action::BodyParser do
         described_class.parse(env, config)
 
         expect(env["hanami.action.parsed_body"]).to eq("data" => {"type" => "articles"})
-        expect(env["hanami.action.body_params"]).to eq(data: {type: "articles"})
+        expect(env["hanami.action.body_params"]).to eq("data" => {"type" => "articles"})
       end
 
       it "strips charset from Content-Type" do
@@ -211,9 +211,9 @@ RSpec.describe Hanami::Action::BodyParser do
         described_class.parse(env, config)
 
         expect(env["hanami.action.body_params"]).to eq(
-          user: {
-            name: "Alice",
-            tags: ["ruby", "hanami"]
+          "user" => {
+            "name" => "Alice",
+            "tags" => ["ruby", "hanami"]
           }
         )
       end
@@ -229,7 +229,7 @@ RSpec.describe Hanami::Action::BodyParser do
         described_class.parse(env, config)
 
         expect(env["hanami.action.parsed_body"]).to eq([1, 2, 3])
-        expect(env["hanami.action.body_params"]).to eq(_: [1, 2, 3])
+        expect(env["hanami.action.body_params"]).to eq("_" => [1, 2, 3])
       end
 
       it "handles non-hash JSON with nested hashes (arrays of objects)" do
@@ -243,7 +243,7 @@ RSpec.describe Hanami::Action::BodyParser do
         described_class.parse(env, config)
 
         expect(env["hanami.action.parsed_body"]).to eq([{"name" => "Alice", "age" => 30}, {"name" => "Bob", "age" => 25}])
-        expect(env["hanami.action.body_params"]).to eq(_: [{name: "Alice", age: 30}, {name: "Bob", age: 25}])
+        expect(env["hanami.action.body_params"]).to eq("_" => [{"name" => "Alice", "age" => 30}, {"name" => "Bob", "age" => 25}])
       end
     end
 
@@ -269,7 +269,7 @@ RSpec.describe Hanami::Action::BodyParser do
         described_class.parse(env, config)
 
         expect(env["hanami.action.parsed_body"]).to eq("title" => "My Title")
-        expect(env["hanami.action.body_params"]).to eq(title: "My Title")
+        expect(env["hanami.action.body_params"]).to eq("title" => "My Title")
       end
 
       it "leaves existing router.params untouched when parsing multipart data" do
@@ -294,7 +294,7 @@ RSpec.describe Hanami::Action::BodyParser do
         described_class.parse(env, config)
 
         expect(env["hanami.action.parsed_body"]).to eq("title" => "My Title")
-        expect(env["hanami.action.body_params"]).to eq(title: "My Title")
+        expect(env["hanami.action.body_params"]).to eq("title" => "My Title")
         expect(env["router.params"]).to eq(slug: "my-article")
       end
 
@@ -337,7 +337,7 @@ RSpec.describe Hanami::Action::BodyParser do
         described_class.parse(env, config)
 
         expect(env["hanami.action.parsed_body"]).to eq("custom" => "parsed: test data")
-        expect(env["hanami.action.body_params"]).to eq(custom: "parsed: test data")
+        expect(env["hanami.action.body_params"]).to eq("custom" => "parsed: test data")
       end
 
       it "uses directly registered parser" do

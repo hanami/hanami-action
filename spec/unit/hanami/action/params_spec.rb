@@ -6,7 +6,7 @@ RSpec.describe Hanami::Action::Params do
   describe "#raw" do
     let(:params) { Class.new(Hanami::Action::Params) }
 
-    context "when this feature isn't enabled" do
+    context "when no params schema is defined" do
       let(:action) { ParamsAction.new }
 
       it "raw gets all params" do
@@ -26,7 +26,7 @@ RSpec.describe Hanami::Action::Params do
       end
     end
 
-    context "when this feature is enabled" do
+    context "when a params schema is defined" do
       let(:action) { AllowlistedUploadDslAction.new }
 
       it "raw gets all params" do
@@ -44,12 +44,42 @@ RSpec.describe Hanami::Action::Params do
         end
       end
     end
+
+    context "when the request body is parsed (e.g. multipart)" do
+      let(:config) { Class.new(Hanami::Action).config }
+      let(:boundary) { "----WebKitFormBoundaryTEST" }
+      let(:body) {
+        [
+          "--#{boundary}",
+          'Content-Disposition: form-data; name="_csrf_token"',
+          "",
+          "abc123",
+          "--#{boundary}--"
+        ].join("\r\n")
+      }
+      let(:env) {
+        {
+          "REQUEST_METHOD" => "POST",
+          "CONTENT_TYPE" => "multipart/form-data; boundary=#{boundary}",
+          "CONTENT_LENGTH" => body.bytesize.to_s,
+          Rack::RACK_INPUT => StringIO.new(body)
+        }
+      }
+
+      it "keeps the body params under the string keys sent by the client" do
+        Hanami::Action::BodyParser.parse(env, config)
+        params = Hanami::Action::Params.new(env: env)
+
+        expect(params.raw["_csrf_token"]).to eq("abc123")
+        expect(params[:_csrf_token]).to eq("abc123")
+      end
+    end
   end
 
   describe "allowlisting" do
     let(:params) { Class.new(Hanami::Action::Params) }
 
-    context "when this feature isn't enabled" do
+    context "when no params schema is defined" do
       let(:action) { ParamsAction.new }
 
       it "creates a Params innerclass" do
@@ -97,7 +127,7 @@ RSpec.describe Hanami::Action::Params do
       end
     end
 
-    context "when this feature is enabled" do
+    context "when a params schema is defined" do
       context "with an explicit class" do
         let(:action) { AllowlistedParamsAction.new }
 
