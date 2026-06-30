@@ -9,7 +9,11 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Added
 
+- Support additional `Cache-Control` directives in `response.cache_control`: `:immutable`, `:must_understand`, `stale_while_revalidate:` and `stale_if_error:`. (@timriley)
+
 ### Changed
+
+- `response.cache_control` now raises `ArgumentError` for unknown directives instead of silently dropping them. (@timriley)
 
 ### Deprecated
 
