@@ -18,6 +18,12 @@ end
 
 gem "hanami-utils", github: "hanami/utils", branch: "main"
 
+# Work around RDoc/JRuby incompatibiltiy: rdoc 8 depends on rbs 4, whose native C extension can't
+# build on JRuby.
+#
+# Remove this once https://github.com/ruby/rdoc/issues/1746 is resolved.
+gem "rdoc", "< 8.0"
+
 group :validations do
   gem "dry-validation", github: "dry-rb/dry-validation", branch: "main"
 end
