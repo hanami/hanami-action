@@ -61,7 +61,7 @@ module Hanami
     # Error raised when body parsing fails.
     #
     # @api public
-    # @since x.x.x
+    # @since 3.0.0
     class BodyParsingError < Error
     end
 

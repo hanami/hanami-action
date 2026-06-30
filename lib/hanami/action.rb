@@ -288,7 +288,6 @@ module Hanami
     # exactly the same; Config-specific methods like `#handle_exception` are not available on
     # instances and must be called on the class config instead.
     #
-    # @since x.x.x
     # @api private
     private attr_reader :config
 

@@ -31,7 +31,7 @@ module Hanami
         #
         # @return [Hash{String => #call}]
         #
-        # @since x.x.x
+        # @since 3.0.0
         # @api public
         attr_reader :body_parsers
 

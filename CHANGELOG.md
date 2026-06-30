@@ -9,15 +9,6 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Added
 
-- Parse request bodies based on formats config. (@timriley in #500, #503, #511, #519, @cllns in #508)
-
-    Parsers for multipart form bodies and JSON are included by default. These require `formats.accept :html` and `formats.accept :json` respectively. When no formats are configured, multipart form bodies are parsed if found.
-
-    Custom parsers may be registered via e.g. `formats.register(:custom, "application/custom", parser: ->(body, env) { ... })` or directly via `formats.body_parsers["application/custom"] = parser`.
-
-    Parsed body params are symbolized as part of becoming the `Hanami::Action::Params` instance. Non-hash bodies are wrapped in `{"_" => parsed_body}`.
-- Full JRuby support. (@katafrakt in #498)
-
 ### Changed
 
 ### Deprecated
@@ -28,7 +19,59 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Security
 
-[Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.0.rc1...HEAD
+[Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.0...HEAD
+
+## [3.0.0] - 2026-06-30
+
+### Added
+
+- Parse request bodies based on formats config. (@timriley in #500, #503, #511, #519, @cllns in #508)
+
+    Parsers for multipart form bodies and JSON are included by default. These require `formats.accept :html` and `formats.accept :json` respectively. When no formats are configured, multipart form bodies are parsed if found.
+
+    Custom parsers may be registered via e.g. `formats.register(:custom, "application/custom", parser: ->(body, env) { ... })` or directly via `formats.body_parsers["application/custom"] = parser`.
+
+    Parsed body params are symbolized as part of becoming the `Hanami::Action::Params` instance. Non-hash bodies are wrapped in `{"_" => parsed_body}`.
+- Support additional `Cache-Control` directives in `response.cache_control`: `:immutable`, `:must_understand`, `stale_while_revalidate:` and `stale_if_error:`. (@timriley in #522)
+- Full JRuby support. (@katafrakt in #498)
+
+### Changed
+
+- Renamed gem from hanami-controller to hanami-action. You should now `require "hanami-action"` or `require "hanami/action"`. (@timriley in #507, @cllns in df365b5)
+- Check for the dry-validation gem (instead of hanami-validations, which is now retired) before loading `Action.params` and `Action.contract` support. (@timriley in #505)
+- Raise `ArgumentError` from `response.cache_control` for unknown directives, instead of silently dropping them. (@timriley in #522)
+- Cache the action's resolved configuration as a frozen `Data` snapshot (via dry-configurable's `#to_data`) at initialization, avoiding repeated config lookups on the request hot path for improved memory usage and speed. Required bumping `dry-configurable` to `~> 1.4`. (@cllns in #512)
+
+  **Possibly breaking:** the action's config is now finalized (frozen) when the action is initialized, so mutating it from instance code is no longer possible. This was only ever an undocumented side-effect of implementation, not a supported pattern.
+- Cut per-request allocations on the `Hanami::Action#call` hot path, roughly halving allocations and increasing throughput ~1.5–2.5x per action invocation. A minimal action drops from 51 to 16 allocations (69% fewer, 2.45x faster); an action with formats negotiating an `Accept` header drops from 95 to 61 allocations (36% fewer, 1.55x faster). (@cllns in #514)
+- Require Ruby 3.3 or newer.
+
+### Removed
+
+- Removed deprecated format config methods: `Action.format`, `config.format`, `config.formats.add`, `config.formats.values`.  (@timriley in #504)
+- Removed `Hanami::Action::Params.params` and support for defining a contract by subclassing `Hanami::Action::Params`. If you are subclassing `Hanami::Action::Params`, take your params block and move it into a `Dry::Validation::Contract` subclass.  Then pass this contract class to `Hanami::Action.params` or `Hanami::Action.contract`. (@timriley in #513)
+
+  ```ruby
+  # Before
+  # class SignupParams < Hanami::Action::Params
+  #   params do
+  #     required(:email).filled(:str?)
+  #   end
+  # end
+  
+  # After
+  class SignupContract < Dry::Validation::Contract
+    params do
+      required(:email).filled(:str?)
+    end
+  end
+  
+  class Signup < Hanami::Action
+    params SignupParams
+  end
+  ```
+
+[3.0.0]: https://github.com/hanami/hanami-action/compare/v2.3.2...v3.0.0
 
 ## [3.0.0.rc1] - 2026-06-16
 
@@ -50,7 +93,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - Cache the action's resolved configuration as a frozen `Data` snapshot (via dry-configurable's `#to_data`) at initialization, avoiding repeated config lookups on the request hot path for improved memory usage and speed. Required bumping `dry-configurable` to `~> 1.4`. (@cllns in #512)
 
   **Possibly breaking:** the action's config is now finalized (frozen) when the action is initialized, so mutating it from instance code is no longer possible. This was only ever an undocumented side-effect of implementation, not a supported pattern.
-- Cut per-request allocations on the `Hanami::Action#call` hot path, roughly halving allocations and increasing throughput ~1.5–2.5× per action invocation. A minimal action drops from 51 to 16 allocations (69% fewer, 2.45× faster); an action with formats negotiating an `Accept` header drops from 95 to 61 allocations (36% fewer, 1.55× faster). (@cllns in #514)
+- Cut per-request allocations on the `Hanami::Action#call` hot path, roughly halving allocations and increasing throughput ~1.5–2.5x per action invocation. A minimal action drops from 51 to 16 allocations (69% fewer, 2.45x faster); an action with formats negotiating an `Accept` header drops from 95 to 61 allocations (36% fewer, 1.55x faster). (@cllns in #514)
 - Require Ruby 3.3 or newer.
 
 ### Removed
