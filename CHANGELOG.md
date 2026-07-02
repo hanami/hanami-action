@@ -23,7 +23,21 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Security
 
-[Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.1...HEAD
+
+## [3.0.1] - 2026-07-03
+
+Adding an improvement that was originally intended for 3.0.0.
+
+### Added
+
+- Support additional `Cache-Control` directives in `response.cache_control`: `:immutable`, `:must_understand`, `stale_while_revalidate:` (requires a duration) and `stale_if_error:` (requires a duration). (@timriley in #522)
+
+### Changed
+
+- `response.cache_control` raises `ArgumentError` for unknown directives instead of silently dropping them. (@timriley in #522)
+
+[3.0.1]: https://github.com/hanami/hanami-action/compare/v3.0.0...v3.0.1
 
 ## [3.0.0] - 2026-06-30
 
