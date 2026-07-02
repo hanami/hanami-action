@@ -3,13 +3,18 @@
 RSpec.describe Hanami::Action::Cache::Directives do
   describe "#directives" do
     context "non value directives" do
-      it "accepts public symbol" do
-        subject = described_class.new(:public)
+      it "accepts immutable symbol" do
+        subject = described_class.new(:immutable)
         expect(subject.values.size).to eq(1)
       end
 
-      it "accepts private symbol" do
-        subject = described_class.new(:private)
+      it "accepts must_revalidate symbol" do
+        subject = described_class.new(:must_revalidate)
+        expect(subject.values.size).to eq(1)
+      end
+
+      it "accepts must_understand symbol" do
+        subject = described_class.new(:must_understand)
         expect(subject.values.size).to eq(1)
       end
 
@@ -28,8 +33,8 @@ RSpec.describe Hanami::Action::Cache::Directives do
         expect(subject.values.size).to eq(1)
       end
 
-      it "accepts must_revalidate symbol" do
-        subject = described_class.new(:must_revalidate)
+      it "accepts private symbol" do
+        subject = described_class.new(:private)
         expect(subject.values.size).to eq(1)
       end
 
@@ -38,9 +43,14 @@ RSpec.describe Hanami::Action::Cache::Directives do
         expect(subject.values.size).to eq(1)
       end
 
-      it "does not accept weird symbol" do
-        subject = described_class.new(:weird)
-        expect(subject.values.size).to eq(0)
+      it "accepts public symbol" do
+        subject = described_class.new(:public)
+        expect(subject.values.size).to eq(1)
+      end
+
+      it "raises ArgumentError for an unknown symbol" do
+        expect { described_class.new(:weird) }
+          .to raise_error(ArgumentError, "Unknown cache control directive: :weird")
       end
 
       context "multiple symbols" do
@@ -69,8 +79,8 @@ RSpec.describe Hanami::Action::Cache::Directives do
         expect(subject.values.size).to eq(1)
       end
 
-      it "accepts s_maxage symbol" do
-        subject = described_class.new(s_maxage: 600)
+      it "accepts max_stale symbol" do
+        subject = described_class.new(max_stale: 600)
         expect(subject.values.size).to eq(1)
       end
 
@@ -79,14 +89,24 @@ RSpec.describe Hanami::Action::Cache::Directives do
         expect(subject.values.size).to eq(1)
       end
 
-      it "accepts max_stale symbol" do
-        subject = described_class.new(max_stale: 600)
+      it "accepts s_maxage symbol" do
+        subject = described_class.new(s_maxage: 600)
         expect(subject.values.size).to eq(1)
       end
 
-      it "does not accept weird symbol" do
-        subject = described_class.new(weird: 600)
-        expect(subject.values.size).to eq(0)
+      it "accepts stale_if_error symbol" do
+        subject = described_class.new(stale_if_error: 600)
+        expect(subject.values.size).to eq(1)
+      end
+
+      it "accepts stale_while_revalidate symbol" do
+        subject = described_class.new(stale_while_revalidate: 600)
+        expect(subject.values.size).to eq(1)
+      end
+
+      it "raises ArgumentError for an unknown symbol" do
+        expect { described_class.new(weird: 600) }
+          .to raise_error(ArgumentError, "Unknown cache control directive: :weird")
       end
 
       context "multiple symbols" do

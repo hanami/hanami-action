@@ -7,13 +7,30 @@ module Hanami
       #
       # @since 0.3.0
       # @api private
-      VALUE_DIRECTIVES      = %i[max_age s_maxage min_fresh max_stale].freeze
+      VALUE_DIRECTIVES = %i[
+        max_age
+        max_stale
+        min_fresh
+        s_maxage
+        stale_if_error
+        stale_while_revalidate
+      ].freeze
 
       # Cache-Control directives which are implicitly true
       #
       # @since 0.3.0
       # @api private
-      NON_VALUE_DIRECTIVES  = %i[public private no_cache no_store no_transform must_revalidate proxy_revalidate].freeze
+      NON_VALUE_DIRECTIVES = %i[
+        immutable
+        must_revalidate
+        must_understand
+        no_cache
+        no_store
+        no_transform
+        private
+        proxy_revalidate
+        public
+      ].freeze
 
       # Class representing value directives
       #
@@ -41,7 +58,7 @@ module Hanami
         # @since 0.3.0
         # @api private
         def valid?
-          VALUE_DIRECTIVES.include? @name
+          VALUE_DIRECTIVES.include?(@name)
         end
       end
 
@@ -71,7 +88,7 @@ module Hanami
         # @since 0.3.0
         # @api private
         def valid?
-          NON_VALUE_DIRECTIVES.include? @name
+          NON_VALUE_DIRECTIVES.include?(@name)
         end
       end
 
@@ -104,7 +121,11 @@ module Hanami
         # @since 0.3.0
         # @api private
         def <<(directive)
-          @directives << directive if directive.valid?
+          unless directive.valid?
+            raise ArgumentError.new("Unknown cache control directive: #{directive.name.inspect}")
+          end
+
+          @directives << directive
         end
 
         # @since 0.3.0

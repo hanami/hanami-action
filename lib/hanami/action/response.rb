@@ -332,12 +332,17 @@ module Hanami
 
       # Specifies the response freshness policy for HTTP caches using the `Cache-Control` header.
       #
-      # Any number of non-value directives (`:public`, `:private`, `:no_cache`, `:no_store`,
-      # `:must_revalidate`, `:proxy_revalidate`) may be passed along with a Hash of value directives
-      # (`:max_age`, `:min_stale`, `:s_max_age`).
+      # Directives come in two forms:
       #
-      # See [RFC 2616 / 14.9](http://tools.ietf.org/html/rfc2616#section-14.9.1) for more on
-      # standard cache control directives.
+      # - Non-value directives (such as `:public` or `:no_store`) are passed as bare symbols.
+      # - Value directives (such as `max_age:` or `s_maxage:`) are passed as a trailing Hash.
+      #
+      # See the `@option` entries below for the full set of supported directives. Passing an unknown
+      # directive raises an `ArgumentError`.
+      #
+      # See [MDN's Cache-Control reference][mdn] for more on the standard cache control directives.
+      #
+      # [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control
       #
       # @example
       #   # Set Cache-Control directives
@@ -349,15 +354,21 @@ module Hanami
       #   response.get_header("Cache-Control") # => "private, no-store, max-age=900"
       #
       # @param values [Array<Symbol, Hash>] values to map to `Cache-Control` directives
-      # @option values [Symbol] :public
-      # @option values [Symbol] :private
+      # @option values [Symbol] :immutable
+      # @option values [Symbol] :must_revalidate
+      # @option values [Symbol] :must_understand
       # @option values [Symbol] :no_cache
       # @option values [Symbol] :no_store
-      # @option values [Symbol] :must_validate
+      # @option values [Symbol] :no_transform
+      # @option values [Symbol] :private
       # @option values [Symbol] :proxy_revalidate
+      # @option values [Symbol] :public
       # @option values [Hash] :max_age
-      # @option values [Hash] :min_stale
-      # @option values [Hash] :s_max_age
+      # @option values [Hash] :max_stale
+      # @option values [Hash] :min_fresh
+      # @option values [Hash] :s_maxage
+      # @option values [Hash] :stale_if_error
+      # @option values [Hash] :stale_while_revalidate
       #
       # @return void
       #
