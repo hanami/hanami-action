@@ -16,9 +16,16 @@ RSpec.describe Hanami::Action do
       expect(response.session).to eq({})
     end
 
-    it "allows value access via symbols" do
+    it "allows value access via strings" do
       action   = SessionAction.new
       response = action.call("rack.session" => {"foo" => "bar"})
+
+      expect(response.session["foo"]).to eq("bar")
+    end
+
+    it "allows value access via symbols" do
+      action   = SessionAction.new
+      response = action.call("rack.session" => {foo: "bar"})
 
       expect(response.session[:foo]).to eq("bar")
     end
