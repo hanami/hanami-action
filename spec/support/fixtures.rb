@@ -312,6 +312,38 @@ class YieldBeforeBlockAction < BeforeBlockAction
   before { |req, res| res[:yielded_params] = req.params }
 end
 
+class BeforeCallableAction < Hanami::Action
+  module SetArticleTitle
+    extend self
+
+    def call(_, res) = res[:article] = "Guten Tag!"
+  end
+
+  module ReverseArticleTitle
+    extend self
+
+    def call(_, res) = res[:article] = reverse(res[:article])
+
+    private
+
+    # this is to ensure we don't inadvertently break method dispatch
+    # please don't actually write code this way
+    def reverse(string) = string.reverse
+  end
+
+  module TrackArguments
+    extend self
+
+    def call(req, res) = res[:arguments] = [req.class.name, res.class.name]
+  end
+
+  before SetArticleTitle
+  before ReverseArticleTitle
+  before TrackArguments
+
+  def handle(req, res) = nil
+end
+
 class AfterMethodAction < Hanami::Action
   after :set_egg, :scramble_egg, :log_request
   append_after :add_first_name_to_logger, :add_last_name_to_logger
