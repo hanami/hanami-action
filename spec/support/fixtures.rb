@@ -410,6 +410,36 @@ class YieldAfterBlockAction < AfterBlockAction
   end
 end
 
+class AfterCallableAction < Hanami::Action
+  module SetEgg
+    extend self
+
+    def call(_, res) = res[:egg] = "Ei!"
+  end
+
+  module ReverseEgg
+    extend self
+
+    def call(_, res) = res[:egg] = reverse(res[:egg])
+
+    private
+
+    # don't actually do things like this, we're just testing
+    # we don't break method dispatch
+    def reverse(string) = string.reverse
+  end
+
+  module LogRequest
+    extend self
+
+    def call(req, res) = res[:arguments] = [req.class.name, res.class.name]
+  end
+
+  after SetEgg, ReverseEgg, LogRequest
+
+  def handle(*) = nil
+end
+
 class MissingRequestSessionAction < Hanami::Action
   def handle(req, _)
     req.session[:user_id]
