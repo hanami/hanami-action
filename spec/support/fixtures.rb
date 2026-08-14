@@ -344,6 +344,18 @@ class BeforeCallableAction < Hanami::Action
   def handle(req, res) = nil
 end
 
+class BeforeLambdaAction < Hanami::Action
+  SetArticleTitle     = ->(_, res)   { res[:article] = "Guten Morgen!" }
+  ReverseArticleTitle = ->(_, res)   { res[:article] = res[:article].reverse }
+  TrackArguments      = ->(req, res) { res[:arguments] = [req.class.name, res.class.name] }
+
+  before SetArticleTitle
+  before ReverseArticleTitle
+  before TrackArguments
+
+  def handle(req, res) = nil
+end
+
 class AfterMethodAction < Hanami::Action
   after :set_egg, :scramble_egg, :log_request
   append_after :add_first_name_to_logger, :add_last_name_to_logger
