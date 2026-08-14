@@ -18,5 +18,13 @@ RSpec.describe Hanami::Action do
       expect(response[:egg]).to       eq("Coque".reverse)
       expect(response[:arguments]).to eq(["Hanami::Action::Request", "Hanami::Action::Response"])
     end
+
+    it "invokes the given callable object after the action is run" do
+      action = AfterCallableAction.new
+      response = action.call({})
+
+      expect(response[:egg]).to   eq("Ei!".reverse)
+      expect(response[:arguments]).to eq(["Hanami::Action::Request", "Hanami::Action::Response"])
+    end
   end
 end
