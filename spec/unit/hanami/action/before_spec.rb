@@ -26,5 +26,13 @@ RSpec.describe Hanami::Action do
       expect(response[:article]).to   eq("Guten Tag!".reverse)
       expect(response[:arguments]).to eq(["Hanami::Action::Request", "Hanami::Action::Response"])
     end
+
+    it "invokes the given callable lambda before the action is run" do
+      action = BeforeLambdaAction.new
+      response = action.call({})
+
+      expect(response[:article]).to   eq("Guten Morgen!".reverse)
+      expect(response[:arguments]).to eq(["Hanami::Action::Request", "Hanami::Action::Response"])
+    end
   end
 end
