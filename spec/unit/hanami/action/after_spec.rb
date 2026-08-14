@@ -23,7 +23,7 @@ RSpec.describe Hanami::Action do
       action = AfterCallableAction.new
       response = action.call({})
 
-      expect(response[:egg]).to   eq("Ei!".reverse)
+      expect(response[:egg]).to       eq("Ei!".reverse)
       expect(response[:arguments]).to eq(["Hanami::Action::Request", "Hanami::Action::Response"])
     end
 

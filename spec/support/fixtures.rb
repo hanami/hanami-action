@@ -441,8 +441,8 @@ class AfterCallableAction < Hanami::Action
 end
 
 class AfterLambdaAction < Hanami::Action
-  SetEgg     = ->(_,   res) { res[:egg] = "CGA palette 1 enthusiast" }
-  ReverseEgg = ->(_,   res) { res[:egg] = res[:egg].reverse }
+  SetEgg     = ->(_, res)   { res[:egg] = "CGA palette 1 enthusiast" }
+  ReverseEgg = ->(_, res)   { res[:egg] = res[:egg].reverse }
   LogRequest = ->(req, res) { res[:arguments] = [req.class.name, res.class.name] }
 
   after SetEgg, ReverseEgg, LogRequest
