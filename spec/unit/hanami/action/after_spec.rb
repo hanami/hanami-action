@@ -26,5 +26,13 @@ RSpec.describe Hanami::Action do
       expect(response[:egg]).to   eq("Ei!".reverse)
       expect(response[:arguments]).to eq(["Hanami::Action::Request", "Hanami::Action::Response"])
     end
+
+    it "invokes the given callable lambda after the action is run" do
+      action = AfterLambdaAction.new
+      response = action.call({})
+
+      expect(response[:egg]).to       eq("CGA palette 1 enthusiast".reverse)
+      expect(response[:arguments]).to eq(["Hanami::Action::Request", "Hanami::Action::Response"])
+    end
   end
 end
