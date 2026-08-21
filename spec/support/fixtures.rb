@@ -312,6 +312,50 @@ class YieldBeforeBlockAction < BeforeBlockAction
   before { |req, res| res[:yielded_params] = req.params }
 end
 
+class BeforeCallableAction < Hanami::Action
+  module SetArticleTitle
+    extend self
+
+    def call(_, res) = res[:article] = "Guten Tag!"
+  end
+
+  module ReverseArticleTitle
+    extend self
+
+    def call(_, res) = res[:article] = reverse(res[:article])
+
+    private
+
+    # this is to ensure we don't inadvertently break method dispatch
+    # please don't actually write code this way
+    def reverse(string) = string.reverse
+  end
+
+  module TrackArguments
+    extend self
+
+    def call(req, res) = res[:arguments] = [req.class.name, res.class.name]
+  end
+
+  before SetArticleTitle
+  before ReverseArticleTitle
+  before TrackArguments
+
+  def handle(req, res) = nil
+end
+
+class BeforeLambdaAction < Hanami::Action
+  SetArticleTitle     = ->(_, res)   { res[:article] = "Guten Morgen!" }
+  ReverseArticleTitle = ->(_, res)   { res[:article] = res[:article].reverse }
+  TrackArguments      = ->(req, res) { res[:arguments] = [req.class.name, res.class.name] }
+
+  before SetArticleTitle
+  before ReverseArticleTitle
+  before TrackArguments
+
+  def handle(req, res) = nil
+end
+
 class AfterMethodAction < Hanami::Action
   after :set_egg, :scramble_egg, :log_request
   append_after :add_first_name_to_logger, :add_last_name_to_logger
@@ -364,6 +408,46 @@ class YieldAfterBlockAction < AfterBlockAction
 
   def handle(*)
   end
+end
+
+class AfterCallableAction < Hanami::Action
+  module SetEgg
+    extend self
+
+    def call(_, res) = res[:egg] = "Ei!"
+  end
+
+  module ReverseEgg
+    extend self
+
+    def call(_, res) = res[:egg] = reverse(res[:egg])
+
+    private
+
+    # don't actually do things like this, we're just testing
+    # we don't break method dispatch
+    def reverse(string) = string.reverse
+  end
+
+  module LogRequest
+    extend self
+
+    def call(req, res) = res[:arguments] = [req.class.name, res.class.name]
+  end
+
+  after SetEgg, ReverseEgg, LogRequest
+
+  def handle(*) = nil
+end
+
+class AfterLambdaAction < Hanami::Action
+  SetEgg     = ->(_, res)   { res[:egg] = "CGA palette 1 enthusiast" }
+  ReverseEgg = ->(_, res)   { res[:egg] = res[:egg].reverse }
+  LogRequest = ->(req, res) { res[:arguments] = [req.class.name, res.class.name] }
+
+  after SetEgg, ReverseEgg, LogRequest
+
+  def handle(*) = nil
 end
 
 class MissingRequestSessionAction < Hanami::Action
