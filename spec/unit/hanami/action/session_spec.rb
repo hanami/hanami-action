@@ -9,6 +9,13 @@ RSpec.describe Hanami::Action do
       expect(response.session).to eq(user_id: "23")
     end
 
+    it "accepts session from TestHelper" do
+      action   = SessionActionWithTestHelper.new
+      response = action.call(session: {user_id: "23"})
+
+      expect(response.session).to eq(user_id: "23")
+    end
+
     it "returns empty hash when it is missing" do
       action   = SessionAction.new
       response = action.call({})
