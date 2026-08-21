@@ -9,7 +9,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Added
 
-- Tested additional types of objects for callbacks that should be supported (@ziggythehamster in #528)
+- Support for callbacks using ordinary objects that respond to `call`; previously, only `#to_proc` objects were accepted. (@ziggythehamster in #528, via hanami/hanami-utils#420)
 
 ### Changed
 
@@ -18,8 +18,6 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 ### Removed
 
 ### Fixed
-
-- Updated `hanami-utils` to a version that correctly handles callbacks that are non-proc callables (@ziggythehamster in #528)
 
 ### Security
 
