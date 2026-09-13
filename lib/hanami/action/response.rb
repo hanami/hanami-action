@@ -114,12 +114,13 @@ module Hanami
           # 2 support.
           headers[Action::CONTENT_LENGTH] = @length.to_s if @length
         when ::Rack::Files::BaseIterator
-          # Drain the file into a buffer, so that the response has a content-length. Reset
-          # `@buffered` first, or `buffered_body!` returns early and leaves the length at 0.
-          @length = 0
-          @buffered = nil
-          @body = body
-          buffered_body!
+          # Wrap the file in a stream, so that files are sent lazily too.
+          #
+          # `Rack::Files` sets its own content-length header, which {#_send_file} merges into the
+          # response. Leaving the length nil here keeps that header.
+          @length = nil
+          @buffered = false
+          @body = Stream.new(body)
         else
           # Responding to `each` is not enough for us to be confident this is a fully valid Rack
           # body. Use `Stream` instead.

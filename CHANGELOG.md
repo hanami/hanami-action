@@ -24,6 +24,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Fixed
 
+- `send_file` and `unsafe_send_file` no longer read the whole file into memory before responding.
 - Assigning a body before `send_file` no longer sends `content-length: 0` alongside the file.
 
 ### Security
