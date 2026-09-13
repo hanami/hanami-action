@@ -12,9 +12,7 @@ RSpec.describe "Streaming a response body" do
     let(:action) {
       Class.new(Hanami::Action) do
         def handle(*, response)
-          response.body = Hanami::Action::Stream.new { |out|
-            3.times { |i| out << "row #{i}\n" }
-          }
+          response.stream { |out| 3.times { |i| out << "row #{i}\n" } }
         end
       end
     }
@@ -40,7 +38,7 @@ RSpec.describe "Streaming a response body" do
     let(:action) {
       Class.new(Hanami::Action) do
         def handle(*, response)
-          response.body = Hanami::Action::Stream.new(["row 0\n", "row 1\n"])
+          response.stream(["row 0\n", "row 1\n"])
         end
       end
     }
@@ -90,12 +88,12 @@ RSpec.describe "Streaming a response body" do
 
       Class.new(Hanami::Action) do
         define_method(:handle) do |*, response|
-          response.body = Hanami::Action::Stream.new { |out|
+          response.stream do |out|
             3.times { |i|
               rows << i
               out << "row #{i}\n"
             }
-          }
+          end
         end
       end
     }

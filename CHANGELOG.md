@@ -11,6 +11,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - Support for callbacks using ordinary objects that respond to `call`; previously, only `#to_proc` objects were accepted. (@ziggythehamster in #528, via hanami/hanami-utils#420)
 - `Hanami::Action::Stream`, a lazy response body. Assign a stream to `Response#body=` to send a response in chunks instead of buffering it.
+- `Response#stream`, a convenience for making a `Stream` and assigning it to the body: `response.stream { |out| out << chunk }`. Give it an enumerable of String chunks or a block, just like `Stream` itself.
 
 ### Changed
 

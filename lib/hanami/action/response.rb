@@ -149,6 +149,37 @@ module Hanami
         super
       end
 
+      # Sends the response body in chunks, instead of buffering it.
+      #
+      # Give either an enumerable of String chunks or a block, but not both. A block receives a
+      # writer, which sends a chunk with `#<<` or `#write`.
+      #
+      # This assigns a {Stream} to {#body=}.
+      #
+      # @example Streaming from a block
+      #   response.stream do |out|
+      #     records.each_slice(500) { |batch| out << serialize(batch) }
+      #   end
+      #
+      # @example Streaming from an enumerable
+      #   response.stream(records.lazy.map { |record| serialize(record) })
+      #
+      # @param chunks [#each, nil] an enumerable of String chunks
+      # @param length [Integer, nil] the length of the response in bytes, if known
+      # @yieldparam out [Stream::Writer] the stream writer
+      #
+      # @return [Stream] the stream
+      #
+      # @raise [ArgumentError] if given both an enumerable and a block, or neither
+      #
+      # @see Stream
+      #
+      # @since 3.1.0
+      # @api public
+      def stream(chunks = nil, length: nil, &block)
+        self.body = Stream.new(chunks, length:, &block)
+      end
+
       # Sets the response status.
       #
       # @param code [Integer, Symbol] the status code

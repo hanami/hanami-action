@@ -4,9 +4,12 @@ module Hanami
   class Action
     # A lazy response body, for streaming a response instead of buffering it.
     #
-    # Assign a stream to {Response#body=} to send a response in chunks. Hanami passes the stream to
-    # the web server untouched, so the server writes each chunk as it arrives, and neither Hanami
-    # nor the server holds the whole response in memory.
+    # Call {Response#stream} to send a response in chunks. Hanami passes the stream to the web
+    # server untouched, so the server writes each chunk as it arrives, and neither Hanami nor the
+    # server holds the whole response in memory.
+    #
+    # {Response#stream} makes a stream for you. You can also assign a stream directly via
+    # {Response#body=}.
     #
     # A stream takes either a block or an enumerable of chunks. A block receives a writer, which
     # sends a chunk with `#<<` or `#write`. Every chunk must be a `String`, because this is what
@@ -25,17 +28,18 @@ module Hanami
     #   class Export < Hanami::Action
     #     def handle(request, response)
     #       response.format = :csv
-    #       response.body = Stream.new { |out|
+    #       response.stream do |out|
     #         records.each_slice(500) do |batch|
     #           out << serialize(batch)
     #         end
-    #       }
+    #       end
     #     end
     #   end
     #
     # @example Streaming from an enumerable
-    #   response.body = Stream.new(lines)
+    #   response.stream(records.lazy.map { |record| serialize(record) })
     #
+    # @see Response#stream
     # @see Response#body=
     #
     # @since 3.1.0
