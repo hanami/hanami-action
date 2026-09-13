@@ -105,5 +105,58 @@ module Hanami
     # @since 0.4.0
     class InvalidCSRFTokenError < Error
     end
+
+    # Error raised when a response is given a body it cannot use.
+    #
+    # Raised while the action runs, so it can still become a 500.
+    #
+    # @see Hanami::Action::Response#body=
+    # @see Hanami::Action::Response#write
+    #
+    # @api public
+    # @since 3.1.0
+    class InvalidBodyError < Error
+      # @api private
+      # @since 3.1.0
+      def initialize(body)
+        super(message_for(body))
+      end
+
+      private
+
+      def message_for(body)
+        if body.is_a?(Stream)
+          <<~TEXT
+            Cannot write to a response that is streaming.
+
+            `#write' buffers the whole body, which would undo the stream. Send your chunks from
+            inside the stream instead:
+
+              response.body = Stream.new { |out| out << "chunk" }
+          TEXT
+        else
+          <<~TEXT
+            Cannot use `#{body.class}' as a response body.
+
+            Give a String, or give a `Hanami::Action::Stream' to send the response in chunks:
+
+              response.body = Stream.new { |out| out << "chunk" }
+          TEXT
+        end
+      end
+    end
+
+    # Error raised when a stream fails while the web server reads it.
+    #
+    # The web server reads the stream after the action returns. By then the status and the headers
+    # are already sent, so this error cannot become a 500, and the client receives an incomplete
+    # response.
+    #
+    # @see Hanami::Action::Stream#each
+    #
+    # @api public
+    # @since 3.1.0
+    class StreamError < Error
+    end
   end
 end

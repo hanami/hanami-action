@@ -42,7 +42,7 @@ RSpec.describe Hanami::Action do
         end
 
         def render(*, res)
-          res.body = res.exposures.keys
+          res.body = res.exposures.keys.to_s
         end
       end
     end

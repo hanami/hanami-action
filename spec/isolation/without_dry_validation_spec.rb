@@ -42,7 +42,7 @@ RSpec.describe "Without validations" do
   it "has params that are always valid" do
     action = Class.new(Hanami::Action) do
       def handle(req, res)
-        res.body = [req.params.respond_to?(:valid?), req.params.valid?]
+        res.body = [req.params.respond_to?(:valid?), req.params.valid?].to_s
       end
     end
 

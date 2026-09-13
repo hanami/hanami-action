@@ -10,14 +10,21 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 ### Added
 
 - Support for callbacks using ordinary objects that respond to `call`; previously, only `#to_proc` objects were accepted. (@ziggythehamster in #528, via hanami/hanami-utils#420)
+- `Hanami::Action::Stream`, a lazy response body. Assign a stream to `Response#body=` to send a response in chunks instead of buffering it.
 
 ### Changed
+
+- `Response#body=` raises `Hanami::Action::InvalidBodyError` when given an object that responds to `#each`, such as an Array or an Enumerator. Previously it sent the `#inspect` output of that object to the client. Wrap chunks in a `Hanami::Action::Stream` instead.
+- `Response#write` raises `Hanami::Action::InvalidBodyError` when the body is a `Stream`, rather than quietly buffering the whole stream.
+- `Response#body=` closes the body it replaces, so that a discarded stream releases whatever it holds open.
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- Assigning a body before `send_file` no longer sends `content-length: 0` alongside the file.
 
 ### Security
 

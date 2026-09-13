@@ -70,26 +70,82 @@ module Hanami
 
       # Sets the response body.
       #
-      # @param str [String] the body string
+      # Give a String to send a buffered response, or a {Stream} to send the response in chunks.
+      # Any other object becomes a String via `#to_s`.
+      #
+      # Raises for a collection, such as an Array or an Enumerator. These look like Rack bodies, but
+      # a buffered response cannot hold them, and `#to_s` would send their `#inspect` output to the
+      # client. Wrap a collection of String chunks in a {Stream} instead.
+      #
+      # Closes the body being replaced, if it can be closed. This releases whatever a stream holds
+      # open.
+      #
+      # @param body [String, Stream, nil] the body
+      #
+      # @raise [Hanami::Action::InvalidBodyError] if given an object that responds to `#each`
+      #
+      # @see Stream
       #
       # @since 2.0.0
       # @api public
-      def body=(str)
-        @length = 0
+      def body=(body)
+        # Rack requires us to close a body that we replace.
+        close unless @body.equal?(body)
 
-        if str.nil? || str == EMPTY_BODY
+        case body
+        when nil, EMPTY_BODY
+          @length = 0
+          @buffered = true
           @body = EMPTY_BODY
-          return
-        end
+        when Stream
+          # When given a Stream, assign it directly. Rack will send it to the client one chunk at a
+          # time, via #each. If the stream has no length, `Rack::Response#finish` sets no
+          # content-length, and the server uses chunked transfer encoding.
+          @length = body.length
+          @buffered = false
+          @body = body
 
-        @body = []
+          # Clear a content-length left behind by the body we replaced, such as the one that
+          # {#_send_file} merges in. It describes that body, not this stream.
+          headers.delete(Action::CONTENT_LENGTH)
 
-        if str.is_a?(::Rack::Files::BaseIterator)
-          @body = str
-          buffered_body! # Ensure appropriate content-length is set
+          # Rack 2 sets the content-length header as a body is written, rather than at `finish`, so
+          # set it here. Rack 3 sets it from `@length` in `finish`, so this can go when we drop Rack
+          # 2 support.
+          headers[Action::CONTENT_LENGTH] = @length.to_s if @length
+        when ::Rack::Files::BaseIterator
+          # Drain the file into a buffer, so that the response has a content-length. Reset
+          # `@buffered` first, or `buffered_body!` returns early and leaves the length at 0.
+          @length = 0
+          @buffered = nil
+          @body = body
+          buffered_body!
         else
-          write(str)
+          # Responding to `each` is not enough for us to be confident this is a fully valid Rack
+          # body. Use `Stream` instead.
+          raise InvalidBodyError.new(body) if body.respond_to?(:each)
+
+          @length = 0
+          @buffered = true
+          @body = []
+          write(body)
         end
+      end
+
+      # Appends a chunk to a buffered response body.
+      #
+      # @param chunk [String] the chunk to append
+      #
+      # @raise [Hanami::Action::InvalidBodyError] if the body is a {Stream}
+      #
+      # @since 2.0.0
+      # @api public
+      def write(chunk)
+        # Without this, `Rack::Response#write` would drain the stream into an array, which is the
+        # opposite of what the stream is for.
+        raise InvalidBodyError.new(@body) if @body.is_a?(Stream)
+
+        super
       end
 
       # Sets the response status.
