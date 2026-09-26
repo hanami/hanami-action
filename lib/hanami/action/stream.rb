@@ -96,13 +96,13 @@ module Hanami
       #
       # @since 3.1.0
       # @api public
-      def initialize(chunks = nil, length: nil, &block)
-        unless chunks.nil? ^ block.nil?
+      def initialize(chunks = nil, length: nil, &producer)
+        unless chunks.nil? ^ producer.nil?
           raise ArgumentError, "give #{self.class} either an enumerable of chunks or a block"
         end
 
         @chunks = chunks
-        @block = block
+        @producer = producer
         @length = length
         @closed = false
       end
@@ -129,8 +129,8 @@ module Hanami
 
         writer = Writer.new(callback)
 
-        if @block
-          @block.call(writer)
+        if @producer
+          @producer.call(writer)
         else
           @chunks.each { |chunk| writer << chunk }
         end
