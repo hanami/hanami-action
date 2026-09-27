@@ -1744,7 +1744,7 @@ class ContractActionBase < Hanami::Action
         new_name: request.params[:book][:title].upcase
       )
     else
-      response.body = {errors: request.params.errors.to_h}
+      response.body = {errors: request.params.errors.to_h}.to_s
       response.status = 302
     end
   end
