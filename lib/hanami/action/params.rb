@@ -27,6 +27,15 @@ module Hanami
       # @api private
       EMPTY_PARAMS = {}.freeze
 
+      # Errors raised by Rack when a query string or form body cannot be parsed into params.
+      #
+      # @api private
+      RACK_PARSING_ERRORS = [
+        ::Rack::QueryParser::ParameterTypeError,
+        ::Rack::QueryParser::InvalidParameterError,
+        ::Rack::QueryParser::ParamsTooDeepError
+      ].freeze
+
       # Params errors
       #
       # @since 1.1.0
@@ -330,6 +339,8 @@ module Hanami
         result.merge!(env[ACTION_BODY_PARAMS]) if has_body_params
 
         result
+      rescue *RACK_PARSING_ERRORS => exception
+        raise ParamsParsingError, exception.message
       end
 
       def _form_content_type?(content_type)
