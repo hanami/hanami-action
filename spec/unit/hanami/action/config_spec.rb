@@ -4,8 +4,8 @@ RSpec.describe Hanami::Action::Config do
   subject(:config) { Class.new(Hanami::Action).config }
 
   describe "#handled_exceptions" do
-    it "is an empty hash by default" do
-      expect(config.handled_exceptions).to eq({})
+    it "handles body parsing errors as 400 Bad Request by default" do
+      expect(config.handled_exceptions).to eq(Hanami::Action::BodyParsingError => 400)
     end
 
     it "allows specifying a complete set of exceptions" do
@@ -15,10 +15,10 @@ RSpec.describe Hanami::Action::Config do
 
     it "allows adding individual exceptions" do
       config.handle_exception ArgumentError => 400
-      expect(config.handled_exceptions).to eq(ArgumentError => 400)
+      expect(config.handled_exceptions).to include(ArgumentError => 400)
 
       config.handle_exception TypeError => 400
-      expect(config.handled_exceptions).to eq(ArgumentError => 400, TypeError => 400)
+      expect(config.handled_exceptions).to include(ArgumentError => 400, TypeError => 400)
     end
 
     it "allows specifying multiple exceptions as strings" do

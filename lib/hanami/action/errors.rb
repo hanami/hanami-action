@@ -60,6 +60,10 @@ module Hanami
 
     # Error raised when body parsing fails.
     #
+    # Handled as a 400 Bad Request by default. Use `config.handle_exception` to handle it differently.
+    #
+    # @see Config#handle_exception
+    #
     # @api public
     # @since 3.0.0
     class BodyParsingError < Error
