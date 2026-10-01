@@ -18,7 +18,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - `Response#body=` raises `Hanami::Action::InvalidBodyError` when given an object that responds to `#each`, such as an Array or an Enumerator. Previously it sent the `#inspect` output of that object to the client. Wrap chunks in a `Hanami::Action::Stream` instead.
 - `Response#write` raises `Hanami::Action::InvalidBodyError` when the body is a `Stream`, rather than quietly buffering the whole stream.
 - `Response#body=` closes the body it replaces, so that a discarded stream releases whatever it holds open.
-- Requests with a body that cannot be parsed now get a 400 Bad Request response by default, instead of raising `Hanami::Action::BodyParsingError` (which was rendered as a 500). To handle these differently, use `config.handle_exception Hanami::Action::BodyParsingError => :your_handler`.
+- Requests with a body that cannot be parsed now respond with 400 Bad Request by default, instead of raising `Hanami::Action::BodyParsingError` (which typically becomes a 500). To handle these differently, use `config.handle_exception Hanami::Action::BodyParsingError => :your_handler`. (@cllns in #531)
 
 ### Deprecated
 
