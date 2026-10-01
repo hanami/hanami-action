@@ -63,7 +63,7 @@ module Hanami
     extend Dry::Configurable(config_class: Config)
 
     # See {Config} for individual setting accessor API docs
-    setting :handled_exceptions, default: {}
+    setting :handled_exceptions, default: {BodyParsingError => 400}
     setting :formats, default: Config::Formats.new, mutable: true
     setting :default_charset
     setting :default_headers, default: {}, constructor: -> (headers) { headers.compact }

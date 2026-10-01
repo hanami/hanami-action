@@ -209,7 +209,7 @@ RSpec.describe "Body parsing", :app_integration do
   end
 
   describe "Error handling" do
-    it "raises BodyParsingError for invalid JSON" do
+    it "returns 400 Bad Request for invalid JSON" do
       action_class = Class.new(Hanami::Action) do
         config.formats.accept :json
 
@@ -224,12 +224,13 @@ RSpec.describe "Body parsing", :app_integration do
         Rack::RACK_INPUT => StringIO.new("{invalid json}")
       }
 
-      expect {
-        action_class.new.call(env)
-      }.to raise_error(Hanami::Action::BodyParsingError)
+      status, _headers, body = action_class.new.call(env)
+
+      expect(status).to eq(400)
+      expect(body).to eq(["Bad Request"])
     end
 
-    it "raises BodyParsingError for invalid multipart data" do
+    it "returns 400 Bad Request for invalid multipart data" do
       action_class = Class.new(Hanami::Action) do
         config.formats.accept :html
 
@@ -245,9 +246,32 @@ RSpec.describe "Body parsing", :app_integration do
         Rack::RACK_INPUT => StringIO.new("invalid data!")
       }
 
-      expect {
-        action_class.new.call(env)
-      }.to raise_error(Hanami::Action::BodyParsingError)
+      status, _headers, body = action_class.new.call(env)
+
+      expect(status).to eq(400)
+      expect(body).to eq(["Bad Request"])
+    end
+
+    it "returns 400 Bad Request when a broader exception is also handled" do
+      action_class = Class.new(Hanami::Action) do
+        config.formats.accept :json
+        config.handle_exception StandardError => 500
+
+        def handle(req, res)
+          res.body = "Should not reach here"
+        end
+      end
+
+      env = {
+        "REQUEST_METHOD" => "POST",
+        "CONTENT_TYPE" => "application/json",
+        Rack::RACK_INPUT => StringIO.new("{invalid json}")
+      }
+
+      status, _headers, body = action_class.new.call(env)
+
+      expect(status).to eq(400)
+      expect(body).to eq(["Bad Request"])
     end
 
     it "allows custom handling of body parsing errors" do
