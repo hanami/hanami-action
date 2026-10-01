@@ -2,7 +2,7 @@
 
 [actions]: https://github.com/hanami/hanami-action/actions
 [chat]: https://discord.gg/naQApPAsZB
-[forum]: https://discourse.hanamirb.org
+[forum]: https://discourse.hanakai.org
 [rubygem]: https://rubygems.org/gems/hanami-action
 
 # Hanami Action [![Gem Version](https://badge.fury.io/rb/hanami-action.svg)][rubygem] [![CI Status](https://github.com/hanami/hanami-action/workflows/CI/badge.svg)][actions]
