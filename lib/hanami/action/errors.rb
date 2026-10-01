@@ -69,6 +69,17 @@ module Hanami
     class BodyParsingError < Error
     end
 
+    # Error raised when the query string or a form body cannot be parsed into params.
+    #
+    # Handled as a 400 Bad Request by default. Use `config.handle_exception` to handle it differently.
+    #
+    # @see Config#handle_exception
+    #
+    # @api public
+    # @since x.x.x
+    class ParamsParsingError < Error
+    end
+
     # Error raised when session is accessed but not enabled.
     #
     # This error is raised when `session` or `flash` is accessed/set on request/response objects

@@ -63,7 +63,7 @@ module Hanami
     extend Dry::Configurable(config_class: Config)
 
     # See {Config} for individual setting accessor API docs
-    setting :handled_exceptions, default: {BodyParsingError => 400}
+    setting :handled_exceptions, default: {BodyParsingError => 400, ParamsParsingError => 400}
     setting :formats, default: Config::Formats.new, mutable: true
     setting :default_charset
     setting :default_headers, default: {}, constructor: -> (headers) { headers.compact }
@@ -331,20 +331,17 @@ module Hanami
       response = nil
 
       halted = catch :halt do
-        # Catch body parsing errors early, and wait to raise them until _after_ we've built our
-        # request and response, to give exception handlers real objects to work with.
-        body_parse_error = nil
+        # Catch parsing errors early, and wait to raise them until _after_ we've built our request
+        # and response, to give exception handlers real objects to work with.
+        parse_error = nil
         begin
           BodyParser.parse env, config
-        rescue BodyParsingError => exception
-          body_parse_error = exception
+          params = Params.new(env: env, contract: contract)
+        rescue BodyParsingError, ParamsParsingError => exception
+          parse_error = exception
+          # Create empty params if parsing failed, to avoid validating corrupted input.
+          params = Params.new(env: {}, contract: contract)
         end
-
-        params = Params.new(
-          # Create empty params if body parsing failed, to avoid validating corrupted input.
-          env: body_parse_error ? {} : env,
-          contract: contract
-        )
 
         # Ensure env has REQUEST_METHOD for downstream code (e.g. Response) when actions are called
         # with a direct params hash as a testing convenience.
@@ -374,7 +371,7 @@ module Hanami
           session_enabled: session_enabled?
         )
 
-        raise body_parse_error if body_parse_error
+        raise parse_error if parse_error
 
         enforce_accepted_media_types(request)
 
