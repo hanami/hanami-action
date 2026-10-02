@@ -43,6 +43,25 @@ RSpec.describe "Params parsing" do
       expect(body).to eq(["Bad Request"])
     end
 
+    it "returns 400 Bad Request for a param name that is not valid UTF-8" do
+      action_class = Class.new(Hanami::Action) do
+        def handle(req, res)
+          res.body = "Should not reach here"
+        end
+      end
+
+      env = {
+        "REQUEST_METHOD" => "GET",
+        "QUERY_STRING" => "%FF=1",
+        Rack::RACK_INPUT => StringIO.new
+      }
+
+      status, _headers, body = action_class.new.call(env)
+
+      expect(status).to eq(400)
+      expect(body).to eq(["Bad Request"])
+    end
+
     it "returns 400 Bad Request when a broader exception is also handled" do
       action_class = Class.new(Hanami::Action) do
         config.handle_exception StandardError => 500
