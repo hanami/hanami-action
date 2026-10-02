@@ -3,6 +3,68 @@
 require "rack"
 
 RSpec.describe Hanami::Action::Params do
+  describe "#initialize" do
+    subject(:params) { described_class.new(env: env) }
+
+    let(:env) {
+      {
+        "REQUEST_METHOD" => "GET",
+        "QUERY_STRING" => query_string,
+        Rack::RACK_INPUT => StringIO.new
+      }
+    }
+
+    context "when the query string has conflicting param types" do
+      let(:query_string) { "a=1&a[b]=2" }
+
+      it "raises a ParamsParsingError" do
+        expect { params }.to raise_error(
+          Hanami::Action::ParamsParsingError,
+          /expected Hash \(got String\) for param `a'/
+        )
+      end
+    end
+
+    context "when the query string has invalid percent-encoding" do
+      let(:query_string) { "a=%ZZ" }
+
+      it "raises a ParamsParsingError" do
+        expect { params }.to raise_error(Hanami::Action::ParamsParsingError, /invalid %-encoding/)
+      end
+    end
+
+    context "when the query string is nested too deeply" do
+      let(:query_string) { "a#{"[b]" * 200}=1" }
+
+      it "raises a ParamsParsingError" do
+        expect { params }.to raise_error(Hanami::Action::ParamsParsingError)
+      end
+    end
+
+    context "when the query string has a key that is not valid UTF-8" do
+      let(:query_string) { "%FF=1" }
+
+      it "raises a ParamsParsingError" do
+        expect { params }.to raise_error(Hanami::Action::ParamsParsingError)
+      end
+    end
+
+    context "when a form body has conflicting param types" do
+      let(:env) {
+        {
+          "REQUEST_METHOD" => "POST",
+          "CONTENT_TYPE" => "application/x-www-form-urlencoded",
+          "CONTENT_LENGTH" => "10",
+          Rack::RACK_INPUT => StringIO.new("a=1&a[b]=2")
+        }
+      }
+
+      it "raises a ParamsParsingError" do
+        expect { params }.to raise_error(Hanami::Action::ParamsParsingError)
+      end
+    end
+  end
+
   describe "#raw" do
     let(:params) { Class.new(Hanami::Action::Params) }
 

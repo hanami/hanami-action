@@ -27,6 +27,15 @@ module Hanami
       # @api private
       EMPTY_PARAMS = {}.freeze
 
+      # Errors raised by Rack when a query string or form body cannot be parsed into params.
+      #
+      # @api private
+      RACK_PARSING_ERRORS = [
+        ::Rack::QueryParser::ParameterTypeError,
+        ::Rack::QueryParser::InvalidParameterError,
+        ::Rack::QueryParser::ParamsTooDeepError
+      ].freeze
+
       # Params errors
       #
       # @since 1.1.0
@@ -163,7 +172,7 @@ module Hanami
           @params = validation.to_h
           @errors = Errors.new(validation.errors.to_h)
         else
-          @params = raw.empty? ? EMPTY_PARAMS : Utils::Hash.deep_symbolize(raw)
+          @params = raw.empty? ? EMPTY_PARAMS : _symbolize(raw)
           @errors = Errors.new
         end
 
@@ -330,6 +339,15 @@ module Hanami
         result.merge!(env[ACTION_BODY_PARAMS]) if has_body_params
 
         result
+      rescue *RACK_PARSING_ERRORS => exception
+        raise ParamsParsingError, exception.message
+      end
+
+      # Rack accepts keys that are not valid UTF-8, but they cannot become symbols.
+      def _symbolize(raw)
+        Utils::Hash.deep_symbolize(raw)
+      rescue EncodingError => exception
+        raise ParamsParsingError, exception.message
       end
 
       def _form_content_type?(content_type)
