@@ -41,6 +41,30 @@ RSpec.describe Hanami::Action::Params do
       end
     end
 
+    context "when the query string has a key that is not valid UTF-8" do
+      let(:query_string) { "%FF=1" }
+
+      it "raises a ParamsParsingError" do
+        expect { params }.to raise_error(Hanami::Action::ParamsParsingError, /invalid symbol/)
+      end
+    end
+
+    context "when the query string has a nested key that is not valid UTF-8" do
+      let(:query_string) { "a[%FF]=1" }
+
+      it "raises a ParamsParsingError" do
+        expect { params }.to raise_error(Hanami::Action::ParamsParsingError, /invalid symbol/)
+      end
+    end
+
+    context "when the query string has a value that is not valid UTF-8" do
+      let(:query_string) { "a=%FF" }
+
+      it "keeps the value as given" do
+        expect(params.to_h).to eq(a: "\xFF")
+      end
+    end
+
     context "when a form body has conflicting param types" do
       let(:env) {
         {

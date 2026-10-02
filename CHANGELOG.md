@@ -19,7 +19,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - `Response#write` raises `Hanami::Action::InvalidBodyError` when the body is a `Stream`, rather than quietly buffering the whole stream.
 - `Response#body=` closes the body it replaces, so that a discarded stream releases whatever it holds open.
 - Requests with a body that cannot be parsed now respond with 400 Bad Request by default, instead of raising `Hanami::Action::BodyParsingError` (which typically becomes a 500). To handle these differently, use `config.handle_exception Hanami::Action::BodyParsingError => :your_handler`. (@cllns in #531)
-- Requests with a query string or form body that cannot be parsed into params (such as `?a=1&a[b]=2` or invalid percent-encoding) now get a 400 Bad Request response by default. Rack's parsing errors are wrapped in a new `Hanami::Action::ParamsParsingError`, raised once the request and response are built, so it can be handled with `config.handle_exception` like any other exception. (@cllns in #532)
+- Requests with a query string or form body that cannot be parsed into params (such as `?a=1&a[b]=2`, invalid percent-encoding, or a param name that is not valid UTF-8) now get a 400 Bad Request response by default. The underlying errors are wrapped in a new `Hanami::Action::ParamsParsingError`, raised once the request and response are built, so it can be handled with `config.handle_exception` like any other exception. (@cllns in #532)
 
 ### Deprecated
 

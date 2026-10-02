@@ -172,7 +172,7 @@ module Hanami
           @params = validation.to_h
           @errors = Errors.new(validation.errors.to_h)
         else
-          @params = raw.empty? ? EMPTY_PARAMS : Utils::Hash.deep_symbolize(raw)
+          @params = raw.empty? ? EMPTY_PARAMS : _symbolize(raw)
           @errors = Errors.new
         end
 
@@ -340,6 +340,13 @@ module Hanami
 
         result
       rescue *RACK_PARSING_ERRORS => exception
+        raise ParamsParsingError, exception.message
+      end
+
+      # Rack accepts keys that are not valid UTF-8, but they cannot become symbols.
+      def _symbolize(raw)
+        Utils::Hash.deep_symbolize(raw)
+      rescue EncodingError => exception
         raise ParamsParsingError, exception.message
       end
 
