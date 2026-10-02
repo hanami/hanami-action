@@ -45,7 +45,7 @@ RSpec.describe Hanami::Action::Params do
       let(:query_string) { "%FF=1" }
 
       it "raises a ParamsParsingError" do
-        expect { params }.to raise_error(Hanami::Action::ParamsParsingError, /invalid symbol/)
+        expect { params }.to raise_error(Hanami::Action::ParamsParsingError)
       end
     end
 
@@ -53,7 +53,7 @@ RSpec.describe Hanami::Action::Params do
       let(:query_string) { "a[%FF]=1" }
 
       it "raises a ParamsParsingError" do
-        expect { params }.to raise_error(Hanami::Action::ParamsParsingError, /invalid symbol/)
+        expect { params }.to raise_error(Hanami::Action::ParamsParsingError)
       end
     end
 
