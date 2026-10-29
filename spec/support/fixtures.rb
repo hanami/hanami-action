@@ -475,6 +475,14 @@ class SessionAction < Hanami::Action
   end
 end
 
+class SessionActionWithTestHelper < Hanami::Action
+  include Hanami::Action::Session
+  include Hanami::Action::TestHelper
+
+  def handle(req, res)
+  end
+end
+
 class FlashAction < Hanami::Action
   include Hanami::Action::Session
 
