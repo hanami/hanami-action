@@ -121,4 +121,28 @@ RSpec.describe "Contract" do
       end
     end
   end
+
+  describe "keys nested in a hash the contract does not describe" do
+    let(:action) do
+      Class.new(Hanami::Action) do
+        contract do
+          params do
+            required(:title).filled(:string)
+            optional(:details).maybe(:hash)
+          end
+        end
+
+        def handle(req, res)
+          res.body = req.params.to_h.inspect
+        end
+      end.new
+    end
+
+    it "symbolizes them like the rest of the params" do
+      response = action.call("title" => "Hanami", "details" => {"pages" => "300"})
+
+      expect(response[:params].to_h).to eq(title: "Hanami", details: {pages: "300"})
+      expect(response[:params].raw.fetch("details")).to eq("pages" => "300")
+    end
+  end
 end
