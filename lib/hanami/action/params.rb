@@ -159,7 +159,7 @@ module Hanami
         @raw = _extract_params
 
         if contract
-          validation = contract.call(raw)
+          validation = contract.call(Utils::Hash.deep_symbolize(raw))
           @params = validation.to_h
           @errors = Errors.new(validation.errors.to_h)
         else
