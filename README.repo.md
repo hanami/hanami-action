@@ -23,7 +23,7 @@ $ gem install hanami-action
 
 ## Usage
 
-Hanami Action is a micro library for web frameworks. It works beautifully with [Hanami Router](https://github.com/hanami/router), but it can be employed everywhere. It's designed to be fast and testable.
+Hanami Action is a micro library for web frameworks. It works beautifully with [Hanami Router](https://github.com/hanami/hanami-router), but it can be employed everywhere. It's designed to be fast and testable.
 
 ### Actions
 
@@ -52,9 +52,9 @@ Imagine how **fast** the unit test could be.
 
 ```ruby
 class Show < Hanami::Action
-  def initialize(configuration:, repository: ArticleRepository.new)
+  def initialize(repository: ArticleRepository.new, **)
     @repository = repository
-    super(configuration: configuration)
+    super(**)
   end
 
   def handle(request, response)
@@ -66,8 +66,7 @@ class Show < Hanami::Action
   attr_reader :repository
 end
 
-configuration = Hanami::Action::Configuration.new
-action = Show.new(configuration: configuration, repository: ArticleRepository.new)
+action = Show.new(repository: ArticleRepository.new)
 action.call(id: 23)
 ```
 
@@ -109,7 +108,7 @@ class Show < Hanami::Action
   end
 end
 
-action   = Show.new(configuration: configuration)
+action   = Show.new
 response = action.call(id: 23, key: "value")
 ```
 
@@ -136,10 +135,6 @@ class Signup < Hanami::Action
   end
 
   def handle(request, *)
-    # Describe inheritance hierarchy
-    puts request.params.class            # => Signup::Params
-    puts request.params.class.superclass # => Hanami::Action::Params
-
     # Allowlist :first_name, but not :admin
     puts request.params[:first_name]     # => "Luca"
     puts request.params[:admin]          # => nil
@@ -169,7 +164,7 @@ class Signup < Hanami::Action
   params do
     required(:first_name).filled(:str?)
     required(:last_name).filled(:str?)
-    required(:email).filled?(:str?, format?: /\A.+@.+\z/)
+    required(:email).filled(:str?, format?: /\A.+@.+\z/)
     required(:password).filled(:str?).confirmation
     required(:terms_of_service).filled(:bool?)
     required(:age).filled(:int?, included_in?: 18..99)
@@ -191,7 +186,7 @@ The output of `#call` is a `Hanami::Action::Response`:
 class Show < Hanami::Action
 end
 
-action = Show.new(configuration: configuration)
+action = Show.new
 action.call({}) # => #<Hanami::Action::Response:0x00007fe8be968418 @status=200 ...>
 ```
 
@@ -207,13 +202,16 @@ class Show < Hanami::Action
 end
 
 action = Show.new
-action.call({}) # => [201, { "X-Custom" => "OK" }, ["Hi!"]]
+response = action.call({})
+response.status  # => 201
+response.headers # => {"content-type" => "application/octet-stream; charset=utf-8", "x-custom" => "OK"}
+response.body    # => ["Hi!"]
 ```
 
 ### Exposures
 
 In case you need to send data from the action to other layers of your application, you can use exposures.
-By default, an action exposes the received params.
+By default, an action exposes the received params and the response format.
 
 ```ruby
 class Show < Hanami::Action
@@ -222,14 +220,14 @@ class Show < Hanami::Action
   end
 end
 
-action   = Show.new(configuration: configuration)
+action   = Show.new
 response = action.call(id: 23)
 
 article = response[:article]
 article.class # => Article
 article.id # => 23
 
-response.exposures.keys # => [:params, :article]
+response.exposures.keys # => [:article, :params, :format]
 ```
 
 ### Callbacks
@@ -285,7 +283,7 @@ class Show < Hanami::Action
   end
 end
 
-action = Show.new(configuration: configuration)
+action = Show.new
 action.call({}) # => [500, {}, ["Internal Server Error"]]
 ```
 
@@ -300,7 +298,7 @@ class Show < Hanami::Action
   end
 end
 
-action = Show.new(configuration: configuration)
+action = Show.new
 action.call({}) # => [404, {}, ["Not Found"]]
 ```
 
@@ -322,24 +320,24 @@ class Create < Hanami::Action
   end
 end
 
-action = Create.new(configuration: configuration)
+action = Create.new
 action.call({}) # => [400, {}, ["Invalid arguments"]]
 ```
 
-Exception policies can be defined globally via configuration:
+Exception policies can be defined for a group of actions via the config of a shared superclass:
 
 ```ruby
-configuration = Hanami::Action::Configuration.new do |config|
+class BaseAction < Hanami::Action
   config.handle_exception RecordNotFound => 404
 end
 
-class Show < Hanami::Action
+class Show < BaseAction
   def handle(*)
     raise RecordNotFound
   end
 end
 
-action = Show.new(configuration: configuration)
+action = Show.new
 action.call({}) # => [404, {}, ["Not Found"]]
 ```
 
@@ -403,7 +401,7 @@ class Show < Hanami::Action
   end
 end
 
-action = Show.new(configuration: configuration)
+action = Show.new
 action.call({}) # => [401, {}, ["Unauthorized"]]
 ```
 
@@ -422,7 +420,7 @@ class Show < Hanami::Action
   end
 end
 
-action = Show.new(configuration: configuration)
+action = Show.new
 action.call({}) # => [404, {}, ["This is not the droid you're looking for"]]
 ```
 
@@ -446,7 +444,7 @@ class ReadCookiesFromRackEnv < Hanami::Action
   end
 end
 
-action = ReadCookiesFromRackEnv.new(configuration: configuration)
+action = ReadCookiesFromRackEnv.new
 action.call({"HTTP_COOKIE" => "foo=bar"})
 ```
 
@@ -465,8 +463,8 @@ class SetCookies < Hanami::Action
   end
 end
 
-action = SetCookies.new(configuration: configuration)
-action.call({}) # => [200, {"Set-Cookie" => "foo=bar"}, "..."]
+action = SetCookies.new
+action.call({}) # => [200, {"set-cookie" => "foo=bar"}, "..."]
 ```
 
 They are removed by setting their value to `nil`:
@@ -484,22 +482,20 @@ class RemoveCookies < Hanami::Action
   end
 end
 
-action = RemoveCookies.new(configuration: configuration)
-action.call({}) # => [200, {"Set-Cookie" => "foo=; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 -0000"}, "..."]
+action = RemoveCookies.new
+action.call({}) # => [200, {"set-cookie" => "foo=; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT"}, "..."]
 ```
 
-Default values can be set in configuration, but overridden case by case.
+Default values can be set in config, but overridden case by case.
 
 ```ruby
 require "hanami/action"
 require "hanami/action/cookies"
 
-configuration = Hanami::Action::Configuration.new do |config|
-  config.cookies(max_age: 300) # 5 minutes
-end
-
 class SetCookies < Hanami::Action
   include Hanami::Action::Cookies
+
+  config.cookies = {max_age: 300} # 5 minutes
 
   def handle(*, response)
     # ...
@@ -507,8 +503,8 @@ class SetCookies < Hanami::Action
   end
 end
 
-action = SetCookies.new(configuration: configuration)
-action.call({}) # => [200, {"Set-Cookie" => "foo=bar; max-age=100;"}, "..."]
+action = SetCookies.new
+action.call({}) # => [200, {"set-cookie" => "foo=bar; max-age=100; expires=..."}, "..."]
 ```
 
 ### Sessions
@@ -530,7 +526,7 @@ class ReadSessionFromRackEnv < Hanami::Action
   end
 end
 
-action = ReadSessionFromRackEnv.new(configuration: configuration)
+action = ReadSessionFromRackEnv.new
 action.call({ "rack.session" => { "age" => "35" } })
 ```
 
@@ -549,8 +545,8 @@ class SetSession < Hanami::Action
   end
 end
 
-action = SetSession.new(configuration: configuration)
-action.call({}) # => [200, {"Set-Cookie"=>"rack.session=..."}, "..."]
+action = SetSession.new
+action.call({}) # => [200, {"set-cookie" => "rack.session=..."}, "..."]
 ```
 
 Values can be removed like a Hash:
@@ -568,8 +564,8 @@ class RemoveSession < Hanami::Action
   end
 end
 
-action = RemoveSession.new(configuration: configuration)
-action.call({}) # => [200, {"Set-Cookie"=>"rack.session=..."}, "..."] it removes that value from the session
+action = RemoveSession.new
+action.call({}) # => [200, {"set-cookie" => "rack.session=..."}, "..."] it removes that value from the session
 ```
 
 While Hanami::Action supports sessions natively, it's **session store agnostic**.
@@ -577,12 +573,12 @@ You have to specify the session store in your Rack middleware configuration (eg 
 
 ```ruby
 use Rack::Session::Cookie, secret: SecureRandom.hex(64)
-run Show.new(configuration: configuration)
+run Show.new
 ```
 
 ### HTTP Cache
 
-Hanami::Action sets your headers correctly according to RFC 2616 / 14.9 for more on standard cache control directives: http://tools.ietf.org/html/rfc2616#section-14.9.1
+Hanami::Action sets your headers correctly according to [RFC 9111](https://www.rfc-editor.org/rfc/rfc9111#name-cache-control), which describes the standard cache control directives.
 
 You can easily set the Cache-Control header for your actions:
 
@@ -622,7 +618,7 @@ According to HTTP specification, conditional GETs provide a way for web servers 
 
 Passing the `HTTP_IF_NONE_MATCH` (content identifier) or `HTTP_IF_MODIFIED_SINCE` (timestamp) headers allows the web server define if the client has a fresh version of a given resource.
 
-You can easily take advantage of Conditional Get using `#fresh` method:
+You can easily take advantage of Conditional Get using the `response.fresh` method:
 
 ```ruby
 require "hanami/action"
@@ -631,9 +627,9 @@ require "hanami/action/cache"
 class ConditionalGetAction < Hanami::Action
   include Hanami::Action::Cache
 
-  def handle(*)
+  def handle(*, response)
     # ...
-    fresh etag: resource.cache_key
+    response.fresh etag: resource.cache_key
     # => halt 304 with header IfNoneMatch = resource.cache_key
   end
 end
@@ -650,9 +646,9 @@ require "hanami/action/cache"
 class ConditionalGetAction < Hanami::Action
   include Hanami::Action::Cache
 
-  def handle(*)
+  def handle(*, response)
     # ...
-    fresh last_modified: resource.updated_at
+    response.fresh last_modified: resource.updated_at
     # => halt 304 with header IfModifiedSince = resource.updated_at.httpdate
   end
 end
@@ -672,8 +668,8 @@ class Create < Hanami::Action
   end
 end
 
-action = Create.new(configuration: configuration)
-action.call({ article: { title: "Hello" }}) # => [302, {"Location" => "/articles/23"}, ""]
+action = Create.new
+action.call({ article: { title: "Hello" }}) # => [302, {"location" => "http://example.com/articles/23", ...}, ["Found"]]
 ```
 
 You can also redirect with a custom status code:
@@ -686,8 +682,8 @@ class Create < Hanami::Action
   end
 end
 
-action = Create.new(configuration: configuration)
-action.call({ article: { title: "Hello" }}) # => [301, {"Location" => "/articles/23"}, ""]
+action = Create.new
+action.call({ article: { title: "Hello" }}) # => [301, {"location" => "http://example.com/articles/23", ...}, ["Moved Permanently"]]
 ```
 
 ### MIME Types
@@ -700,12 +696,12 @@ class Show < Hanami::Action
   end
 end
 
-action = Show.new(configuration: configuration)
+action = Show.new
 
-response = action.call({ "HTTP_ACCEPT" => "*/*" }) # Content-Type "application/octet-stream"
+response = action.call({ "HTTP_ACCEPT" => "*/*" }) # Content-Type "application/octet-stream; charset=utf-8"
 response.format                                    # :all
 
-response = action.call({ "HTTP_ACCEPT" => "text/html" }) # Content-Type "text/html"
+response = action.call({ "HTTP_ACCEPT" => "text/html" }) # Content-Type "text/html; charset=utf-8"
 response.format                                          # :html
 ```
 
@@ -719,12 +715,12 @@ class Show < Hanami::Action
   end
 end
 
-action = Show.new(configuration: configuration)
+action = Show.new
 
-response = action.call({ "HTTP_ACCEPT" => "*/*" }) # Content-Type "application/json"
+response = action.call({ "HTTP_ACCEPT" => "*/*" }) # Content-Type "application/json; charset=utf-8"
 response.format                                    # :json
 
-response = action.call({ "HTTP_ACCEPT" => "text/html" }) # Content-Type "application/json"
+response = action.call({ "HTTP_ACCEPT" => "text/html" }) # Content-Type "application/json; charset=utf-8"
 response.format                                          # :json
 ```
 
@@ -732,7 +728,7 @@ You can restrict the accepted MIME types:
 
 ```ruby
 class Show < Hanami::Action
-  accept :html, :json
+  config.formats.accept :html, :json
 
   def handle(*)
     # ...
@@ -742,7 +738,7 @@ end
 # When called with "*/*"              => 200
 # When called with "text/html"        => 200
 # When called with "application/json" => 200
-# When called with "application/xml"  => 415
+# When called with "application/xml"  => 406
 ```
 
 You can check if the requested MIME type is accepted by the client.
@@ -764,39 +760,40 @@ class Show < Hanami::Action
     request.accept?("text/html")        # => true
     request.accept?("application/xml")  # => true
     request.accept?("application/json") # => true
-    response.format                     # :html
+    response.format                     # :all
   end
 end
 ```
 
 Hanami::Action is shipped with an extensive list of the most common MIME types.
-Also, you can register your own:
+Also, you can register your own, and accept it alongside the standard formats:
 
 ```ruby
-configuration = Hanami::Action::Configuration.new do |config|
-  config.format custom: "application/custom"
+class BaseAction < Hanami::Action
+  config.formats.register(:custom, "application/custom")
+  config.formats.accept :html, :custom
 end
 
-class Index < Hanami::Action
+class Index < BaseAction
   def handle(*)
   end
 end
 
-action = Index.new(configuration: configuration)
+action = Index.new
 
-response = action.call({ "HTTP_ACCEPT" => "application/custom" }) # => Content-Type "application/custom"
+response = action.call({ "HTTP_ACCEPT" => "application/custom" }) # => Content-Type "application/custom; charset=utf-8"
 response.format                                                   # => :custom
 
-class Show < Hanami::Action
+class Show < BaseAction
   def handle(*, response)
     # ...
     response.format = :custom
   end
 end
 
-action = Show.new(configuration: configuration)
+action = Show.new
 
-response = action.call({ "HTTP_ACCEPT" => "*/*" }) # => Content-Type "application/custom"
+response = action.call({ "HTTP_ACCEPT" => "*/*" }) # => Content-Type "application/custom; charset=utf-8"
 response.format                                    # => :custom
 ```
 
@@ -805,11 +802,9 @@ response.format                                    # => :custom
 When the work to be done by the server takes time, it may be a good idea to stream your response. Here's an example of a streamed CSV.
 
 ```ruby
-configuration = Hanami::Action::Configuration.new do |config|
-  config.format csv: 'text/csv'
-end
-
 class Csv < Hanami::Action
+  config.formats.register(:csv, "text/csv")
+
   def handle(*, response)
     response.format = :csv
     response.body = Enumerator.new do |yielder|
@@ -825,13 +820,12 @@ end
 ```
 
 Note:
-* In development, Hanami' code reloading needs to be disabled for streaming to work. This is because `Shotgun` interferes with the streaming action. You can disable it like this `hanami server --code-reloading=false`
 * Streaming does not work with WEBrick as it buffers its response. We recommend using `puma`, though you may find success with other servers
 
 ### No rendering, please
 
 Hanami::Action is designed to be a pure HTTP endpoint, rendering belongs to other layers of MVC.
-You can set the body directly (see [response](#response)), or use [Hanami::View](https://github.com/hanami/view).
+You can set the body directly (see [response](#response)), or use [Hanami::View](https://github.com/hanami/hanami-view).
 
 ### Rack integration
 
