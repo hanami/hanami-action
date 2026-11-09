@@ -28,6 +28,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 - `send_file` and `unsafe_send_file` no longer read the whole file into memory before responding.
 - Assigning a body before `send_file` no longer sends `content-length: 0` alongside the file.
+- With a params contract, keys nested in a hash that the contract does not describe are symbols again, like the rest of the params, instead of strings. (@rafayqayyum, hanami/hanami#1659)
 
 ### Security
 
