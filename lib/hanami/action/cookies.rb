@@ -19,7 +19,7 @@ module Hanami
       #
       # @see Hanami::Action#finish
       def finish(req, res, *)
-        res.cookies.finish
+        res.cookies.finish if res.cookies?
         super
       end
     end

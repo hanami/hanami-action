@@ -19,6 +19,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - `Response#write` raises `Hanami::Action::InvalidBodyError` when the body is a `Stream`, rather than quietly buffering the whole stream.
 - `Response#body=` closes the body it replaces, so that a discarded stream releases whatever it holds open.
 - Requests with a body that cannot be parsed now respond with 400 Bad Request by default, instead of raising `Hanami::Action::BodyParsingError` (which typically becomes a 500). To handle these differently, use `config.handle_exception Hanami::Action::BodyParsingError => :your_handler`. (@cllns in #531)
+- Build the cookie jar only when an action reads or sets a cookie. Previously, every response from an action with cookies enabled parsed the `Cookie` header, whether or not the action used cookies. (@parndt)
 
 ### Deprecated
 

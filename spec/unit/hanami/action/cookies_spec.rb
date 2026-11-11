@@ -2,6 +2,37 @@
 
 RSpec.describe Hanami::Action do
   describe "#cookies" do
+    it "does not build the cookie jar when the action does not use cookies" do
+      action = Class.new(Hanami::Action) {
+        include Hanami::Action::Cookies
+
+        def handle(*, res)
+          res.body = "ok"
+        end
+      }.new
+
+      expect(Hanami::Action::CookieJar).not_to receive(:new)
+
+      response = action.call("HTTP_COOKIE" => "foo=bar")
+
+      expect(response.body).to eq(["ok"])
+      expect(response.headers).not_to include("set-cookie")
+    end
+
+    it "builds the cookie jar on demand after the action has been called" do
+      action = Class.new(Hanami::Action) {
+        include Hanami::Action::Cookies
+
+        def handle(*, res)
+          res.body = "ok"
+        end
+      }.new
+
+      response = action.call("HTTP_COOKIE" => "foo=bar")
+
+      expect(response.cookies).to include(foo: "bar")
+    end
+
     it "gets cookies" do
       action = GetCookiesAction.new
       response = action.call("HTTP_COOKIE" => "foo=bar")
@@ -92,6 +123,25 @@ RSpec.describe Hanami::Action do
             {"Content-Length" => "0", "Content-Type" => "application/octet-stream; charset=utf-8", "Set-Cookie" => "bar=foo; domain=hanamirb.org; path=/action; secure; HttpOnly"}
           end
         expect(response.headers).to eq(expected_headers)
+      end
+
+      it "sets no cookies when the action does not use them" do
+        action = Class.new(Hanami::Action) {
+          include Hanami::Action::Cookies
+
+          config.cookies = {
+            domain: "hanamirb.org", path: "/action", max_age: 300, expires: Time.now + 300,
+            secure: true, httponly: true
+          }
+
+          def handle(*, res)
+            res.body = ""
+          end
+        }.new
+
+        response = action.call("HTTP_COOKIE" => "foo=bar; rack.session=abc")
+
+        expect(response.headers.keys.map(&:downcase)).not_to include("set-cookie")
       end
 
       it "overwritten cookies values are respected" do

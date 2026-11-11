@@ -356,6 +356,16 @@ module Hanami
         @cookies ||= CookieJar.new(env.dup, headers, @config.cookies)
       end
 
+      # Returns true if the cookie jar has been built, which happens the first time {#cookies} is
+      # called.
+      #
+      # @return [Boolean]
+      #
+      # @api private
+      def cookies?
+        !@cookies.nil?
+      end
+
       # Sets the response to redirect to the given URL and halts further handling.
       #
       # @param url [String]
