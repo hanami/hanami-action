@@ -112,6 +112,10 @@ module Hanami
       }.freeze
       private_constant :ACCEPT_TYPES_TO_FORMATS
 
+      # Every media type known by default, in the order used to resolve wildcard matches.
+      DEFAULT_MEDIA_TYPES = (ACCEPT_TYPES_TO_FORMATS.keys | MEDIA_TYPES_TO_FORMATS.keys).freeze
+      private_constant :DEFAULT_MEDIA_TYPES
+
       class << self
         # Yields if an action is configured with `formats`, the request has an `Accept` header, and
         # none of the Accept types matches the accepted formats. The given block is expected to halt
@@ -298,11 +302,25 @@ module Hanami
         # @see https://github.com/hanami/hanami-action/issues/275
         def best_q_match(q_value_header, available_mimes)
           ::Rack::Utils.q_values(q_value_header).each_with_index.map { |(req_mime, quality), index|
-            match = available_mimes.find { |am| ::Rack::Mime.match?(am, req_mime) }
+            match = match_mime(req_mime, available_mimes)
             next unless match
 
             RequestMimeWeight.new(req_mime, quality, index, match)
           }.compact.max&.format
+        end
+
+        # Returns the first of the available media types matching the requested one.
+        #
+        # A requested type naming both a type and a subtype can only match itself, so it is looked
+        # for directly. Only a wildcard or a bare type is compared against each available type.
+        #
+        # @api private
+        def match_mime(req_mime, available_mimes)
+          if req_mime.include?("/") && !req_mime.include?("*")
+            req_mime if available_mimes.include?(req_mime)
+          else
+            available_mimes.find { |am| ::Rack::Mime.match?(am, req_mime) }
+          end
         end
 
         # Checks if a content type is acceptable for the configured formats.
@@ -401,11 +419,7 @@ module Hanami
           # that corresponds to the request's accept header as closely as possible. This means we
           # work from _all_ the media types we know of.
 
-          all_media_types =
-            (ACCEPT_TYPES_TO_FORMATS.keys | MEDIA_TYPES_TO_FORMATS.keys) +
-            config.formats.accept_types
-
-          best_q_match(request.accept, all_media_types)
+          best_q_match(request.accept, DEFAULT_MEDIA_TYPES + config.formats.accept_types)
         end
 
         # @api private
