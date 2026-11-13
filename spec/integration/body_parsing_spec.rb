@@ -230,6 +230,27 @@ RSpec.describe "Body parsing", :app_integration do
       expect(body).to eq(["Bad Request"])
     end
 
+    it "returns 406 Not Acceptable for invalid JSON when the Accept header is not accepted" do
+      action_class = Class.new(Hanami::Action) do
+        config.formats.accept :json
+
+        def handle(req, res)
+          res.body = "Should not reach here"
+        end
+      end
+
+      env = {
+        "REQUEST_METHOD" => "POST",
+        "CONTENT_TYPE" => "application/json",
+        "HTTP_ACCEPT" => "text/html",
+        Rack::RACK_INPUT => StringIO.new("{invalid json}")
+      }
+
+      status, _headers, _body = action_class.new.call(env)
+
+      expect(status).to eq(406)
+    end
+
     it "returns 400 Bad Request for invalid multipart data" do
       action_class = Class.new(Hanami::Action) do
         config.formats.accept :html

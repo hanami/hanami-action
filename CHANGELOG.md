@@ -19,7 +19,9 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - `Response#write` raises `Hanami::Action::InvalidBodyError` when the body is a `Stream`, rather than quietly buffering the whole stream.
 - `Response#body=` closes the body it replaces, so that a discarded stream releases whatever it holds open.
 - Requests with a body that cannot be parsed now respond with 400 Bad Request by default, instead of raising `Hanami::Action::BodyParsingError` (which typically becomes a 500). To handle these differently, use `config.handle_exception Hanami::Action::BodyParsingError => :your_handler`. (@cllns in #531)
+- Requests with a query string or form body that cannot be parsed into params (such as `?a=1&a[b]=2`, invalid percent-encoding, or a param name that is not valid UTF-8) now get a 400 Bad Request response by default. The underlying errors are wrapped in a new `Hanami::Action::ParamsParsingError`, raised once the request and response are built, so it can be handled with `config.handle_exception` like any other exception. (@cllns in #532)
 - Speed up `Accept` header negotiation by looking up non-wildcard media types directly instead of comparing each one against every known media type. (@parndt in #534)
+- For actions with `config.formats` set, the 406 Not Acceptable and 415 Unsupported Media Type checks now run before body and params parsing errors are raised. A request with a media type the action does not accept now gets a 406 or 415 even when its body cannot be parsed, instead of a 400. (@timriley in #532)
 
 ### Deprecated
 

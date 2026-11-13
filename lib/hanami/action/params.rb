@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "rack/request"
+require "rack/multipart"
 require "hanami/utils/hash"
 
 module Hanami
@@ -26,6 +27,26 @@ module Hanami
     class Params
       # @api private
       EMPTY_PARAMS = {}.freeze
+
+      # Errors raised by Rack when a query string or form body cannot be parsed into params.
+      #
+      # Multipart errors are included because a multipart body reaches Rack's parser here when the
+      # action does not accept multipart, so BodyParser skips it. Rack raises a plain `EOFError` for
+      # some malformed multipart bodies. `BoundaryTooLongError` exists only in Rack 3.1 and later.
+      #
+      # `QueryLimitError` covers params that are nested too deeply, too many params, and a query
+      # that is too large. (`ParamsTooDeepError` is an alias for it.)
+      #
+      # @api private
+      RACK_PARSING_ERRORS = [
+        ::Rack::QueryParser::ParameterTypeError,
+        ::Rack::QueryParser::InvalidParameterError,
+        ::Rack::QueryParser::QueryLimitError,
+        ::EOFError,
+        ::Rack::Multipart::MultipartPartLimitError,
+        ::Rack::Multipart::MultipartTotalPartLimitError,
+        (::Rack::Multipart::BoundaryTooLongError if defined?(::Rack::Multipart::BoundaryTooLongError))
+      ].compact.freeze
 
       # Params errors
       #
@@ -163,7 +184,7 @@ module Hanami
           @params = validation.to_h
           @errors = Errors.new(validation.errors.to_h)
         else
-          @params = raw.empty? ? EMPTY_PARAMS : Utils::Hash.deep_symbolize(raw)
+          @params = raw.empty? ? EMPTY_PARAMS : _symbolize(raw)
           @errors = Errors.new
         end
 
@@ -330,6 +351,15 @@ module Hanami
         result.merge!(env[ACTION_BODY_PARAMS]) if has_body_params
 
         result
+      rescue *RACK_PARSING_ERRORS => exception
+        raise ParamsParsingError, exception.message
+      end
+
+      # Rack accepts keys that are not valid UTF-8, but they cannot become symbols.
+      def _symbolize(raw)
+        Utils::Hash.deep_symbolize(raw)
+      rescue EncodingError => exception
+        raise ParamsParsingError, exception.message
       end
 
       def _form_content_type?(content_type)

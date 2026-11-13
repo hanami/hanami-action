@@ -26,8 +26,8 @@ module Hanami
       #
       #   Raised exceptions will return the corresponding HTTP status.
       #
-      #   Defaults to handling {BodyParsingError} as a 400 Bad Request. Assigning a new hash replaces
-      #   this default; use {#handle_exception} to add to it instead.
+      #   Defaults to handling {BodyParsingError} and {ParamsParsingError} as a 400 Bad Request.
+      #   Assigning a new hash replaces this default; use {#handle_exception} to add to it instead.
       #
       #   @return [Hash{Exception=>Integer}] exception classes as keys and HTTP statuses as values
       #
