@@ -331,14 +331,16 @@ module Hanami
       response = nil
 
       halted = catch :halt do
-        # Catch parsing errors early, and wait to raise them until _after_ we've built our request
-        # and response, to give exception handlers real objects to work with.
-        parse_error = nil
+        # Catch errors from parsing and validating params early, and wait to raise them until
+        # _after_ we've built our request and response, to give exception handlers real objects to
+        # work with. This covers expected errors (BodyParsingError, ParamsParsingError) as well as
+        # unexpected ones, such as an exception raised inside a contract.
+        deferred_error = nil
         begin
           BodyParser.parse env, config
           params = Params.new(env: env, contract: contract)
-        rescue BodyParsingError, ParamsParsingError => exception
-          parse_error = exception
+        rescue StandardError => exception
+          deferred_error = exception
           # Create empty params if parsing failed, to avoid validating corrupted input.
           params = Params.new(env: {}, contract: contract)
         end
@@ -375,7 +377,7 @@ module Hanami
         # type we don't accept should get a 406/415 regardless of whether its body parses.
         enforce_accepted_media_types(request)
 
-        raise parse_error if parse_error
+        raise deferred_error if deferred_error
 
         _run_before_callbacks(request, response)
         handle(request, response)

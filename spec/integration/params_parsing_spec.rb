@@ -87,6 +87,55 @@ RSpec.describe "Params parsing" do
       expect(status).to eq(415)
     end
 
+    describe "an unexpected error while building params" do
+      let(:action_class) {
+        Class.new(Hanami::Action) do
+          contract do
+            params do
+              required(:a).filled(:string)
+            end
+
+            rule(:a) { raise "boom" }
+          end
+
+          def handle(req, res)
+            res.body = "Should not reach here"
+          end
+        end
+      }
+
+      let(:env) {
+        {
+          "REQUEST_METHOD" => "GET",
+          "QUERY_STRING" => "a=1",
+          Rack::RACK_INPUT => StringIO.new,
+          "rack.errors" => rack_errors
+        }
+      }
+
+      let(:rack_errors) { StringIO.new }
+
+      it "raises the original error, and references it in rack.errors" do
+        expect { action_class.new.call(env) }.to raise_error(RuntimeError, "boom")
+
+        expect(env["rack.exception"]).to be_a(RuntimeError)
+        expect(rack_errors.string).to start_with("RuntimeError: boom")
+      end
+
+      it "can be handled with config.handle_exception" do
+        action_class.config.handle_exception RuntimeError => :handle_boom
+        action_class.define_method(:handle_boom) do |req, res, exception|
+          res.status = 422
+          res.body = "Handled #{exception.message} for #{req.request_method} with #{req.params.to_h}"
+        end
+
+        status, _headers, body = action_class.new.call(env)
+
+        expect(status).to eq(422)
+        expect(body).to eq(["Handled boom for GET with {}"])
+      end
+    end
+
     it "allows custom handling of params parsing errors" do
       action_class = Class.new(Hanami::Action) do
         config.handle_exception Hanami::Action::ParamsParsingError => :handle_parse_error
