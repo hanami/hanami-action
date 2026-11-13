@@ -371,9 +371,11 @@ module Hanami
           session_enabled: session_enabled?
         )
 
-        raise parse_error if parse_error
-
+        # Check the media types first. These checks read only headers, and a request with a media
+        # type we don't accept should get a 406/415 regardless of whether its body parses.
         enforce_accepted_media_types(request)
+
+        raise parse_error if parse_error
 
         _run_before_callbacks(request, response)
         handle(request, response)
