@@ -34,11 +34,14 @@ module Hanami
       # action does not accept multipart, so BodyParser skips it. Rack raises a plain `EOFError` for
       # some malformed multipart bodies. `BoundaryTooLongError` exists only in Rack 3.1 and later.
       #
+      # `QueryLimitError` covers params that are nested too deeply, too many params, and a query
+      # that is too large. (`ParamsTooDeepError` is an alias for it.)
+      #
       # @api private
       RACK_PARSING_ERRORS = [
         ::Rack::QueryParser::ParameterTypeError,
         ::Rack::QueryParser::InvalidParameterError,
-        ::Rack::QueryParser::ParamsTooDeepError,
+        ::Rack::QueryParser::QueryLimitError,
         ::EOFError,
         ::Rack::Multipart::MultipartPartLimitError,
         ::Rack::Multipart::MultipartTotalPartLimitError,

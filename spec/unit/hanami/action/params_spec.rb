@@ -41,6 +41,14 @@ RSpec.describe Hanami::Action::Params do
       end
     end
 
+    context "when the query string exceeds Rack's size limit" do
+      let(:query_string) { "a=#{"x" * Rack::Utils.default_query_parser.bytesize_limit}" }
+
+      it "raises a ParamsParsingError" do
+        expect { params }.to raise_error(Hanami::Action::ParamsParsingError)
+      end
+    end
+
     context "when the query string has a key that is not valid UTF-8" do
       let(:query_string) { "%FF=1" }
 
