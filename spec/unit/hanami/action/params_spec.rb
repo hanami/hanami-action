@@ -63,6 +63,22 @@ RSpec.describe Hanami::Action::Params do
         expect { params }.to raise_error(Hanami::Action::ParamsParsingError)
       end
     end
+
+    context "when a multipart body is malformed" do
+      let(:body) { "--XYZ\r\nContent-Disposition: form-data; name=\"a\"\r\n\r\nhello" }
+      let(:env) {
+        {
+          "REQUEST_METHOD" => "POST",
+          "CONTENT_TYPE" => "multipart/form-data; boundary=XYZ",
+          "CONTENT_LENGTH" => body.bytesize.to_s,
+          Rack::RACK_INPUT => StringIO.new(body)
+        }
+      }
+
+      it "raises a ParamsParsingError" do
+        expect { params }.to raise_error(Hanami::Action::ParamsParsingError)
+      end
+    end
   end
 
   describe "#raw" do

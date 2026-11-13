@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "rack/request"
+require "rack/multipart"
 require "hanami/utils/hash"
 
 module Hanami
@@ -29,12 +30,20 @@ module Hanami
 
       # Errors raised by Rack when a query string or form body cannot be parsed into params.
       #
+      # Multipart errors are included because a multipart body reaches Rack's parser here when the
+      # action does not accept multipart, so BodyParser skips it. Rack raises a plain `EOFError` for
+      # some malformed multipart bodies. `BoundaryTooLongError` exists only in Rack 3.1 and later.
+      #
       # @api private
       RACK_PARSING_ERRORS = [
         ::Rack::QueryParser::ParameterTypeError,
         ::Rack::QueryParser::InvalidParameterError,
-        ::Rack::QueryParser::ParamsTooDeepError
-      ].freeze
+        ::Rack::QueryParser::ParamsTooDeepError,
+        ::EOFError,
+        ::Rack::Multipart::MultipartPartLimitError,
+        ::Rack::Multipart::MultipartTotalPartLimitError,
+        (::Rack::Multipart::BoundaryTooLongError if defined?(::Rack::Multipart::BoundaryTooLongError))
+      ].compact.freeze
 
       # Params errors
       #
