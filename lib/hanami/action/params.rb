@@ -2,6 +2,9 @@
 
 require "rack/request"
 require "rack/multipart"
+# Loads Rack::QueryParser, which RACK_PARSING_ERRORS refers to when this file loads. In Rack 3,
+# `rack/request` loads it already, but in Rack 2 it does not. Remove this when we drop Rack 2.
+require "rack/utils"
 require "hanami/utils/hash"
 
 module Hanami
