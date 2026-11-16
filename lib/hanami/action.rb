@@ -63,7 +63,7 @@ module Hanami
     extend Dry::Configurable(config_class: Config)
 
     # See {Config} for individual setting accessor API docs
-    setting :handled_exceptions, default: {BodyParsingError => 400}
+    setting :handled_exceptions, default: {BodyParsingError => 400, ParamsParsingError => 400}
     setting :formats, default: Config::Formats.new, mutable: true
     setting :default_charset
     setting :default_headers, default: {}, constructor: -> (headers) { headers.compact }
@@ -331,20 +331,19 @@ module Hanami
       response = nil
 
       halted = catch :halt do
-        # Catch body parsing errors early, and wait to raise them until _after_ we've built our
-        # request and response, to give exception handlers real objects to work with.
-        body_parse_error = nil
+        # Catch errors from parsing and validating params early, and wait to raise them until
+        # _after_ we've built our request and response, to give exception handlers real objects to
+        # work with. This covers expected errors (BodyParsingError, ParamsParsingError) as well as
+        # unexpected ones, such as an exception raised inside a contract.
+        deferred_error = nil
         begin
           BodyParser.parse env, config
-        rescue BodyParsingError => exception
-          body_parse_error = exception
+          params = Params.new(env: env, contract: contract)
+        rescue StandardError => exception
+          deferred_error = exception
+          # Create empty params if parsing failed, to avoid validating corrupted input.
+          params = Params.new(env: {}, contract: contract)
         end
-
-        params = Params.new(
-          # Create empty params if body parsing failed, to avoid validating corrupted input.
-          env: body_parse_error ? {} : env,
-          contract: contract
-        )
 
         # Ensure env has REQUEST_METHOD for downstream code (e.g. Response) when actions are called
         # with a direct params hash as a testing convenience.
@@ -374,9 +373,11 @@ module Hanami
           session_enabled: session_enabled?
         )
 
-        raise body_parse_error if body_parse_error
-
+        # Check the media types first. These checks read only headers, and a request with a media
+        # type we don't accept should get a 406/415 regardless of whether its body parses.
         enforce_accepted_media_types(request)
+
+        raise deferred_error if deferred_error
 
         _run_before_callbacks(request, response)
         handle(request, response)
