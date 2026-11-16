@@ -76,7 +76,7 @@ module Hanami
     # @see Config#handle_exception
     #
     # @api public
-    # @since x.x.x
+    # @since 3.1.0
     class ParamsParsingError < Error
     end
 
