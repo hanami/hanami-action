@@ -181,16 +181,7 @@ module Hanami
       def initialize(env:, contract: nil)
         @env = env
         @raw = _extract_params
-
-        if contract
-          validation = contract.call(Utils::Hash.deep_symbolize(raw))
-          @params = validation.to_h
-          @errors = Errors.new(validation.errors.to_h)
-        else
-          @params = raw.empty? ? EMPTY_PARAMS : _symbolize(raw)
-          @errors = Errors.new
-        @raw = _extract_params
-        raw_symbolized = raw.empty? ? EMPTY_PARAMS : Utils::Hash.deep_symbolize(@raw)
+        raw_symbolized = raw.empty? ? EMPTY_PARAMS : _symbolize(raw)
 
         if contract
           validation = contract.call(raw_symbolized)
