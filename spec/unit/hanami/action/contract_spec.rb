@@ -121,4 +121,38 @@ RSpec.describe "Contract" do
       end
     end
   end
+
+  describe "#to_h" do
+    context "with a contract" do
+      let(:action) do
+        Class.new(Hanami::Action) do
+          contract do
+            params do
+              required(:title).filled(:string)
+              optional(:details).maybe(:hash)
+              optional(:authors).maybe(:array)
+            end
+          end
+
+          def handle(*)
+          end
+        end.new
+      end
+
+      it "symbolizes nested keys that the contract does not describe" do
+        response = action.call(
+          "title" => "Hanami",
+          "details" => {"pages" => "300", "chapters" => [{"title" => "Intro"}]},
+          "authors" => [{"name" => "Luca"}, {"name" => "Tim"}]
+        )
+
+        expect(response[:params].to_h).to eq(
+          title: "Hanami",
+          details: {pages: "300", chapters: [{title: "Intro"}]},
+          authors: [{name: "Luca"}, {name: "Tim"}]
+        )
+        expect(response[:params].raw.fetch("details")).to eq("pages" => "300", "chapters" => [{"title" => "Intro"}])
+      end
+    end
+  end
 end
