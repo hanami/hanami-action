@@ -14,6 +14,9 @@ module Hanami
 
         def_delegators \
           :@session,
+          :[],
+          :[]=,
+          :key?,
           :clear,
           :delete,
           :empty?,
@@ -27,18 +30,6 @@ module Hanami
 
         def initialize(session)
           @session = session
-        end
-
-        def [](key)
-          @session[key.to_s]
-        end
-
-        def []=(key, value)
-          @session[key.to_s] = value
-        end
-
-        def key?(key)
-          @session.key?(key.to_s)
         end
 
         alias_method :has_key?, :key?
