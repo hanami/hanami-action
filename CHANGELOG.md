@@ -36,6 +36,8 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Security
 
+- Give route params precedence over query string and form body params with the same name in actions with a contract. Route params have Symbol keys and the others have String keys, so both were kept and the contract read the query or form value, letting `?id=2` override the `:id` in `/users/1`. (@parndt in GHSA-55j2-5pph-56mv)
+
 [Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.1...HEAD
 
 ## [3.0.1] - 2026-07-03
