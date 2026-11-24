@@ -47,6 +47,42 @@ RSpec.describe "Body parser route params integration" do
     expect(response.body).to eq({id: "23", painter: {first_name: "Gustav", last_name: "Klimt"}}.inspect)
   end
 
+  it "gives route params precedence over the same param in the query string" do
+    response = app.request(
+      "PATCH",
+      "/painters/23?id=42",
+      "CONTENT_TYPE" => "application/json",
+      input: {painter: {first_name: "Gustav", last_name: "Klimt"}}.to_json
+    )
+
+    expect(response.status).to eq(200)
+    expect(response.body).to eq({id: "23", painter: {first_name: "Gustav", last_name: "Klimt"}}.inspect)
+  end
+
+  it "gives route params precedence over the same param in a form body" do
+    response = app.request(
+      "PATCH",
+      "/painters/23",
+      "CONTENT_TYPE" => "application/x-www-form-urlencoded",
+      input: "id=42&painter[first_name]=Gustav&painter[last_name]=Klimt"
+    )
+
+    expect(response.status).to eq(200)
+    expect(response.body).to eq({id: "23", painter: {first_name: "Gustav", last_name: "Klimt"}}.inspect)
+  end
+
+  it "gives a JSON body precedence over the same param in the query string" do
+    response = app.request(
+      "PATCH",
+      "/painters/23?painter[first_name]=Egon",
+      "CONTENT_TYPE" => "application/json",
+      input: {painter: {first_name: "Gustav", last_name: "Klimt"}}.to_json
+    )
+
+    expect(response.status).to eq(200)
+    expect(response.body).to eq({id: "23", painter: {first_name: "Gustav", last_name: "Klimt"}}.inspect)
+  end
+
   it "preserves route params when parsing multipart form data" do
     boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
     body = [

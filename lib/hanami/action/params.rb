@@ -324,12 +324,27 @@ module Hanami
         result = {}
         rack_request = ::Rack::Request.new(env) if has_query || has_form_body
 
-        result.merge!(rack_request.GET) if has_query
-        result.merge!(rack_request.POST) if has_form_body
-        result.merge!(env[ROUTER_PARAMS]) if has_router_params
-        result.merge!(env[ACTION_BODY_PARAMS]) if has_body_params
+        _merge_params(result, rack_request.GET) if has_query
+        _merge_params(result, rack_request.POST) if has_form_body
+        _merge_params(result, env[ROUTER_PARAMS]) if has_router_params
+        _merge_params(result, env[ACTION_BODY_PARAMS]) if has_body_params
 
         result
+      end
+
+      # Merges params, replacing any existing value for the same key, whether it was stored with
+      # a String or a Symbol key. Route params have Symbol keys while the others have String keys,
+      # so without this a query or form param could sit alongside the route param it was meant to
+      # be overridden by, and a contract would read the query or form value instead.
+      def _merge_params(result, params)
+        params.each do |key, value|
+          if key.is_a?(Symbol)
+            result.delete(key.name)
+          elsif key.valid_encoding?
+            result.delete(key.to_sym)
+          end
+          result[key] = value
+        end
       end
 
       def _form_content_type?(content_type)
