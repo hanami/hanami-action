@@ -327,7 +327,11 @@ module Hanami
         result.merge!(rack_request.GET) if has_query
         result.merge!(rack_request.POST) if has_form_body
         _merge_params(result, env[ROUTER_PARAMS]) if has_router_params
-        _merge_params(result, env[ACTION_BODY_PARAMS]) if has_body_params
+
+        if has_body_params
+          _merge_params(result, env[ACTION_BODY_PARAMS])
+          _merge_router_string_params(result, env[ROUTER_PARAMS]) if has_router_params
+        end
 
         result
       end
@@ -345,6 +349,19 @@ module Hanami
             result[key.to_sym] = value if key.valid_encoding? && result.key?(key.to_sym)
           end
 
+          result[key] = value
+        end
+      end
+
+      # Hanami Router gives no way to tell path params apart from the query and form params it
+      # copies alongside them, so a body merged after the route params could override a path param.
+      # Path params are always Strings, so merging the String values again puts them back on top.
+      # Hanami Router symbolizes every key, so these keys are always Symbols.
+      def _merge_router_string_params(result, router_params)
+        router_params.each do |key, value|
+          next unless value.is_a?(String)
+
+          result[key.name] = value if result.key?(key.name)
           result[key] = value
         end
       end
