@@ -366,17 +366,19 @@ module Hanami
         raise ParamsParsingError, exception.message
       end
 
-      # Merges params, replacing any existing value for the same key, whether it was stored with
-      # a String or a Symbol key. Route params have Symbol keys while the others have String keys,
-      # so without this a query or form param could sit alongside the route param it was meant to
-      # be overridden by, and a contract would read the query or form value instead.
+      # Query string, form body, and body params have String keys, while route params have Symbol
+      # keys. Hanami Router also copies query and form params into the route params, so the same
+      # param is often present under both keys. Both must hold the value merged last, or a route
+      # param would not override a query or form param of the same name wherever it is read.
       def _merge_params(result, params)
         params.each do |key, value|
-          if key.is_a?(Symbol)
-            result.delete(key.name)
-          elsif key.valid_encoding?
-            result.delete(key.to_sym)
+          case key
+          when Symbol
+            result[key.name] = value if result.key?(key.name)
+          when String
+            result[key.to_sym] = value if key.valid_encoding? && result.key?(key.to_sym)
           end
+
           result[key] = value
         end
       end

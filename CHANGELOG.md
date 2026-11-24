@@ -33,6 +33,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 - `send_file` and `unsafe_send_file` no longer read the whole file into memory before responding.
 - Assigning a body before `send_file` no longer sends `content-length: 0` alongside the file.
 - Params contracts receive params with symbol keys instead of string keys. This ensures that keys nested in a hash that the contract does not describe stay as symbols, like the rest of the params. (@rafayqayyum in #533)
+- Accept the CSRF token from a form body in routed requests again. Since 3.0.2, the String keys of query string and form body params were dropped from `params.raw` when Hanami Router also gave them as route params, so CSRF protection could not find `_csrf_token` and rejected every form submission. Both keys are now kept, with the same value. (@parndt in #537)
 
 ### Security
 
