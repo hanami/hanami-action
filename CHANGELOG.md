@@ -17,6 +17,8 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Fixed
 
+- Accept the CSRF token from a form body in routed requests again. Since 3.0.2, the String keys of query string and form body params were dropped from `params.raw` when Hanami Router also gave them as route params, so CSRF protection could not find `_csrf_token` and rejected every form submission. Both keys are now kept, with the same value. (@parndt in #537)
+
 ### Security
 
 [Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.2...HEAD
