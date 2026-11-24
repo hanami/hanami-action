@@ -349,8 +349,8 @@ module Hanami
         result = {}
         rack_request = ::Rack::Request.new(env) if has_query || has_form_body
 
-        _merge_params(result, rack_request.GET) if has_query
-        _merge_params(result, rack_request.POST) if has_form_body
+        result.merge!(rack_request.GET) if has_query
+        result.merge!(rack_request.POST) if has_form_body
         _merge_params(result, env[ROUTER_PARAMS]) if has_router_params
         _merge_params(result, env[ACTION_BODY_PARAMS]) if has_body_params
 
