@@ -375,29 +375,28 @@ module Hanami
       # param is often present under both keys. Both must hold the value merged last, or a route
       # param would not override a query or form param of the same name wherever it is read.
       def _merge_params(result, params)
-        params.each do |key, value|
-          case key
-          when Symbol
-            result[key.name] = value if result.key?(key.name)
-          when String
-            result[key.to_sym] = value if key.valid_encoding? && result.key?(key.to_sym)
-          end
-
-          result[key] = value
-        end
+        params.each { |key, value| _merge_param(result, key, value) }
       end
 
       # Hanami Router gives no way to tell path params apart from the query and form params it
       # copies alongside them, so a body merged after the route params could override a path param.
-      # Path params are always Strings, so merging the String values again puts them back on top.
-      # Hanami Router symbolizes every key, so these keys are always Symbols.
+      # Path params are always Strings (or nil for an optional segment that did not match, which
+      # leaves no value to protect), so merging the String values again puts them back on top.
       def _merge_router_string_params(result, router_params)
         router_params.each do |key, value|
-          next unless value.is_a?(String)
-
-          result[key.name] = value if result.key?(key.name)
-          result[key] = value
+          _merge_param(result, key, value) if value.is_a?(String)
         end
+      end
+
+      def _merge_param(result, key, value)
+        case key
+        when Symbol
+          result[key.name] = value if result.key?(key.name)
+        when String
+          result[key.to_sym] = value if key.valid_encoding? && result.key?(key.to_sym)
+        end
+
+        result[key] = value
       end
 
       def _form_content_type?(content_type)
