@@ -349,10 +349,14 @@ module Hanami
         result = {}
         rack_request = ::Rack::Request.new(env) if has_query || has_form_body
 
-        _merge_params(result, rack_request.GET) if has_query
-        _merge_params(result, rack_request.POST) if has_form_body
+        result.merge!(rack_request.GET) if has_query
+        result.merge!(rack_request.POST) if has_form_body
         _merge_params(result, env[ROUTER_PARAMS]) if has_router_params
-        _merge_params(result, env[ACTION_BODY_PARAMS]) if has_body_params
+
+        if has_body_params
+          _merge_params(result, env[ACTION_BODY_PARAMS])
+          _merge_router_string_params(result, env[ROUTER_PARAMS]) if has_router_params
+        end
 
         result
       rescue *RACK_PARSING_ERRORS => exception
@@ -366,19 +370,33 @@ module Hanami
         raise ParamsParsingError, exception.message
       end
 
-      # Merges params, replacing any existing value for the same key, whether it was stored with
-      # a String or a Symbol key. Route params have Symbol keys while the others have String keys,
-      # so without this a query or form param could sit alongside the route param it was meant to
-      # be overridden by, and a contract would read the query or form value instead.
+      # Query string, form body, and body params have String keys, while route params have Symbol
+      # keys. Hanami Router also copies query and form params into the route params, so the same
+      # param is often present under both keys. Both must hold the value merged last, or a route
+      # param would not override a query or form param of the same name wherever it is read.
       def _merge_params(result, params)
-        params.each do |key, value|
-          if key.is_a?(Symbol)
-            result.delete(key.name)
-          elsif key.valid_encoding?
-            result.delete(key.to_sym)
-          end
-          result[key] = value
+        params.each { |key, value| _merge_param(result, key, value) }
+      end
+
+      # Hanami Router gives no way to tell path params apart from the query and form params it
+      # copies alongside them, so a body merged after the route params could override a path param.
+      # Path params are always Strings (or nil for an optional segment that did not match, which
+      # leaves no value to protect), so merging the String values again puts them back on top.
+      def _merge_router_string_params(result, router_params)
+        router_params.each do |key, value|
+          _merge_param(result, key, value) if value.is_a?(String)
         end
+      end
+
+      def _merge_param(result, key, value)
+        case key
+        when Symbol
+          result[key.name] = value if result.key?(key.name)
+        when String
+          result[key.to_sym] = value if key.valid_encoding? && result.key?(key.to_sym)
+        end
+
+        result[key] = value
       end
 
       def _form_content_type?(content_type)
