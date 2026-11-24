@@ -17,7 +17,11 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Fixed
 
+- Accept the CSRF token from a form body in routed requests again. Since 3.0.2, the String keys of query string and form body params were dropped from `params.raw` when Hanami Router also gave them as route params, so CSRF protection could not find `_csrf_token` and rejected every form submission. Both keys are now kept, with the same value. (@parndt in #537)
+
 ### Security
+
+- Give route params precedence over request body params with the same name, such as a JSON or multipart body sending `id=2` to `/users/1`. This completes the fix for GHSA-55j2-5pph-56mv, which covered only the query string and form body. As a result, when the same flat param is in both the query string and the body, the query string value is now used; previously the body value was. Nested params in the body still take precedence over the query string. (@parndt in GHSA-55j2-5pph-56mv)
 
 [Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.2...HEAD
 
