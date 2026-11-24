@@ -9,11 +9,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Added
 
-- Support additional `Cache-Control` directives in `response.cache_control`: `:immutable`, `:must_understand`, `stale_while_revalidate:` (requires a duration) and `stale_if_error:` (requires a duration). (@timriley in #522)
-
 ### Changed
-
-- `response.cache_control` raises `ArgumentError` for unknown directives instead of silently dropping them. (@timriley in #522)
 
 ### Deprecated
 
@@ -23,9 +19,15 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Security
 
+[Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.2...HEAD
+
+## [3.0.2] - 2026-11-24
+
+### Security
+
 - Give route params precedence over query string and form body params with the same name in actions with a contract. Route params have Symbol keys and the others have String keys, so both were kept and the contract read the query or form value, letting `?id=2` override the `:id` in `/users/1`. (@parndt in GHSA-55j2-5pph-56mv)
 
-[Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.1...HEAD
+[3.0.2]: https://github.com/hanami/hanami-action/compare/v3.0.1...v3.0.2
 
 ## [3.0.1] - 2026-07-03
 
