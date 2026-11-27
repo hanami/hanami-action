@@ -9,20 +9,7 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Added
 
-- Support for callbacks using ordinary objects that respond to `call`; previously, only `#to_proc` objects were accepted. (@ziggythehamster in #528, via hanami/hanami-utils#420)
-- `Hanami::Action::Stream`, a lazy response body. Assign a stream to `Response#body=` to send a response in chunks instead of buffering it.
-- `Response#stream`, a convenience method for making a `Stream` and assigning it to the body: `response.stream { |out| out << chunk }`. Give it an enumerable of String chunks or a block, just like `Stream` itself.
-
 ### Changed
-
-- `Response#body=` raises `Hanami::Action::InvalidBodyError` when given an object that responds to `#each`, such as an Array or an Enumerator. Previously it sent the `#inspect` output of that object to the client. Wrap chunks in a `Hanami::Action::Stream` instead.
-- `Response#write` raises `Hanami::Action::InvalidBodyError` when the body is a `Stream`, rather than quietly buffering the whole stream.
-- `Response#body=` closes the body it replaces, so that a discarded stream releases whatever it holds open.
-- Requests with a body that cannot be parsed now respond with 400 Bad Request by default, instead of raising `Hanami::Action::BodyParsingError` (which typically becomes a 500). To handle these differently, use `config.handle_exception Hanami::Action::BodyParsingError => :your_handler`. (@cllns in #531)
-- Requests with a query string or form body that cannot be parsed into params now get a 400 Bad Request response by default. This covers conflicting param types (such as `?a=1&a[b]=2`), invalid percent-encoding, params that exceed Rack's limits (too many, too deeply nested, or too large), and (for actions without a contract) param names that are not valid UTF-8. The underlying errors are wrapped in a new `Hanami::Action::ParamsParsingError`, raised once the request and response are built, so it can be handled with `config.handle_exception` like any other exception. (@cllns in #532)
-- For actions with `config.formats` set, the 406 Not Acceptable and 415 Unsupported Media Type checks now run before body and params parsing errors are raised. A request with a media type the action does not accept now gets a 406 or 415 even when its body cannot be parsed, instead of a 400. (@timriley in #532)
-- Any other exception raised while parsing the body or building params, such as an exception inside a contract, is now raised once the request and response are built. It goes through `config.handle_exception` and is written to `rack.errors` like any other exception. Before, exception handling failed with a `NoMethodError`, which hid the original error. (@timriley in #532)
-- Speed up `Accept` header negotiation by looking up non-wildcard media types directly instead of comparing each one against every known media type. (@parndt in #534)
 
 ### Deprecated
 
@@ -30,17 +17,56 @@ and this project adheres to [Break Versioning](https://www.taoensso.com/break-ve
 
 ### Fixed
 
-- `send_file` and `unsafe_send_file` no longer read the whole file into memory before responding.
-- Assigning a body before `send_file` no longer sends `content-length: 0` alongside the file.
+### Security
+
+[Unreleased]: https://github.com/hanami/hanami-action/compare/v3.1.0.rc1...HEAD
+
+## [3.1.0.rc1] - 2026-11-27
+
+### Added
+
+- `Hanami::Action::Stream`, a lazy response body. Assign a stream to `Response#body=` to send a response in chunks instead of buffering it. (@timriley in #530)
+- `Response#stream`, a convenience method for making a `Stream` and assigning it to the body: `response.stream { |out| out << chunk }`. Give it an enumerable of String chunks or a block, just like `Stream` itself. (@timriley in #530)
+- Support for callbacks using ordinary objects that respond to `call`; previously, only `#to_proc` objects were accepted. (@ziggythehamster in #528, via hanami/hanami-utils#420)
+
+### Changed
+
+- `Response#body=` raises `Hanami::Action::InvalidBodyError` when given an object that responds to `#each`, such as an Array or an Enumerator. Previously it sent the `#inspect` output of that object to the client. Wrap chunks in a `Hanami::Action::Stream` instead. (@timriley in #530)
+- `Response#write` raises `Hanami::Action::InvalidBodyError` when the body is a `Stream`, rather than quietly buffering the whole stream. (@timriley in #530)
+- `Response#body=` closes the body it replaces, so that a discarded stream releases whatever it holds open. (@timriley in #530)
+- Requests with a body that cannot be parsed now respond with 400 Bad Request by default, instead of raising `Hanami::Action::BodyParsingError` (which typically becomes a 500). To handle these differently, use `config.handle_exception Hanami::Action::BodyParsingError => :your_handler`. (@cllns in #531)
+- Requests with a query string or form body that cannot be parsed into params now get a 400 Bad Request response by default. This covers conflicting param types (such as `?a=1&a[b]=2`), invalid percent-encoding, params that exceed Rack's limits (too many, too deeply nested, or too large), and (for actions without a contract) param names that are not valid UTF-8. The underlying errors are wrapped in a new `Hanami::Action::ParamsParsingError`, raised once the request and response are built, so it can be handled with `config.handle_exception` like any other exception. (@cllns in #532)
+- For actions with `config.formats` set, the 406 Not Acceptable and 415 Unsupported Media Type checks now run before body and params parsing errors are raised. A request with a media type the action does not accept now gets a 406 or 415 even when its body cannot be parsed, instead of a 400. (@timriley in #532)
+- Any other exception raised while parsing the body or building params, such as an exception inside a contract, is now raised once the request and response are built. It goes through `config.handle_exception` and is written to `rack.errors` like any other exception. Before, exception handling failed with a `NoMethodError`, which hid the original error. (@timriley in #532)
+- Speed up `Accept` header negotiation by looking up non-wildcard media types directly instead of comparing each one against every known media type. (@parndt in #534)
+
+### Fixed
+
 - Params contracts receive params with symbol keys instead of string keys. This ensures that keys nested in a hash that the contract does not describe stay as symbols, like the rest of the params. (@rafayqayyum in #533)
+- `send_file` and `unsafe_send_file` no longer read the whole file into memory before responding. (@timriley in #530)
+- Assigning a body before `send_file` no longer sends `content-length: 0` alongside the file. (@timriley in #530)
+
+[3.1.0.rc1]: https://github.com/hanami/hanami-action/compare/v3.0.3...v3.1.0.rc1
+
+## [3.0.3] - 2026-11-25
+
+### Fixed
+
 - Accept the CSRF token from a form body in routed requests again. Since 3.0.2, the String keys of query string and form body params were dropped from `params.raw` when Hanami Router also gave them as route params, so CSRF protection could not find `_csrf_token` and rejected every form submission. Both keys are now kept, with the same value. (@parndt in #537)
 
 ### Security
 
-- Give route params precedence over query string and form body params with the same name in actions with a contract. Route params have Symbol keys and the others have String keys, so both were kept and the contract read the query or form value, letting `?id=2` override the `:id` in `/users/1`. (@parndt in GHSA-55j2-5pph-56mv)
 - Give route params precedence over request body params with the same name, such as a JSON or multipart body sending `id=2` to `/users/1`. This completes the fix for GHSA-55j2-5pph-56mv, which covered only the query string and form body. As a result, when the same flat param is in both the query string and the body, the query string value is now used; previously the body value was. Nested params in the body still take precedence over the query string. (@parndt in GHSA-55j2-5pph-56mv)
 
-[Unreleased]: https://github.com/hanami/hanami-action/compare/v3.0.1...HEAD
+[3.0.3]: https://github.com/hanami/hanami-action/compare/v3.0.2...v3.0.3
+
+## [3.0.2] - 2026-11-24
+
+### Security
+
+- Give route params precedence over query string and form body params with the same name in actions with a contract. Route params have Symbol keys and the others have String keys, so both were kept and the contract read the query or form value, letting `?id=2` override the `:id` in `/users/1`. (@parndt in GHSA-55j2-5pph-56mv)
+
+[3.0.2]: https://github.com/hanami/hanami-action/compare/v3.0.1...v3.0.2
 
 ## [3.0.1] - 2026-07-03
 
